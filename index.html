@@ -231,7 +231,6 @@ let characterJob = '';
         <div class="text-center">
           <div>LV.${totalLevel}</div>
           ${icon}
-          <div class="vmatrix_name">${v_core_name}</div>
         </div>
       `;
     } else if (v_core_type === 'Special') {
@@ -240,7 +239,6 @@ let characterJob = '';
         <div class="text-center">
           <div>LV.${v_core_level}</div>
           ${icon}
-          <div class="vmatrix_name">${v_core_name}</div>
         </div>
       `;
     } else if (v_core_type === 'Enhancement') {
@@ -262,7 +260,6 @@ let characterJob = '';
       <div class="text-center">
         <div>LV.${Math.min(level, 60)}</div>
         ${icon}
-        <div class="vmatrix_name">${skillName}</div>
       </div>
     `;
   }
@@ -348,7 +345,7 @@ function getSkillImageTag(skillName, job, type) {
   const html = `
     <div class="v-icon-wrapper" id="${wrapperId}">
       <div class="v-icon-bg" style="position: relative; width: 80px; height: 80px;">
-        <img id="${imgId}" src="images/polygon.png" class="skill-icon" alt="${skillName}">
+        <img id="${imgId}" src="images/polygon.png" class="skill-icon" alt="${skillName}" title="${skillName}">
       </div>
     </div>
   `;
