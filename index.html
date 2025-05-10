@@ -56,7 +56,7 @@
       </div>
       <div class="mb-3">
         <label for="nickname" class="form-label">캐릭터 닉네임</label>
-        <input type="text" id="nickname" class="form-control" placeholder="예: 루나링">
+        <input type="text" id="nickname" class="form-control" placeholder="예: 공략대장">
       </div>
       <div class="mb-3">
         <label for="apiKey" class="form-label">넥슨 Open API 토큰</label>
@@ -308,6 +308,11 @@ let characterJob = '';
         paths.push(`images/5차스킬/특수코어/${cleanName}`);
       }
       console.log('paths : ', paths);
+
+      console.log('flatMap : ', paths.flatMap(path => [
+        `${encodeURI(path)}.png`,
+        `${encodeURI(path)}.webp`
+      ]));
 
       return paths.flatMap(path => [
         `${encodeURI(path)}.png`,
