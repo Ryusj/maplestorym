@@ -44,6 +44,16 @@
     width: 80px;
     height: 80px;
   }
+
+  .vmatrix-name {
+    font-size: 14px;
+    max-width: 64px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+
   </style>
 </head>
 <body>
@@ -219,20 +229,18 @@ let characterJob = '';
       const icon = getSkillImageTag(v_core_name, characterJob, 'Skill');
       vMatrixHTML += `
         <div class="text-center">
-          <img src="images/polygon.png" alt="육각형" width="80"><br>
           <div>LV.${totalLevel}</div>
           ${icon}
-          <div>${v_core_name}</div>
+          <div class="vmatrix_name">${v_core_name}</div>
         </div>
       `;
     } else if (v_core_type === 'Special') {
       const icon = getSkillImageTag(v_core_name, characterJob, 'Special');
       vMatrixHTML += `
         <div class="text-center">
-          <img src="images/polygon.png" alt="육각형" width="80"><br>
           <div>LV.${v_core_level}</div>
           ${icon}
-          <div>${v_core_name}</div>
+          <div class="vmatrix_name">${v_core_name}</div>
         </div>
       `;
     } else if (v_core_type === 'Enhancement') {
@@ -254,7 +262,7 @@ let characterJob = '';
       <div class="text-center">
         <div>LV.${Math.min(level, 60)}</div>
         ${icon}
-        <div>${skillName}</div>
+        <div class="vmatrix_name">${skillName}</div>
       </div>
     `;
   }
@@ -340,7 +348,6 @@ function getSkillImageTag(skillName, job, type) {
   const html = `
     <div class="v-icon-wrapper" id="${wrapperId}">
       <div class="v-icon-bg" style="position: relative; width: 80px; height: 80px;">
-        <img src="images/polygon.png" class="polygon-bg" alt="배경">
         <img id="${imgId}" src="images/polygon.png" class="skill-icon" alt="${skillName}">
       </div>
     </div>
