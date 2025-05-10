@@ -334,12 +334,13 @@ function getSkillImageTag(skillName, job, type) {
     </div>
   `;
 
-  setTimeout(() => {
+  const ensureImgReady = () => {
     const imgEl = document.getElementById(imgId);
     if (!imgEl) {
-      console.log('imgEl is not defined')
+      setTimeout(ensureImgReady, 100); // 아직 DOM에 없으면 재시도
       return;
     }
+
     let index = 0;
 
     const tryNext = () => {
@@ -349,15 +350,14 @@ function getSkillImageTag(skillName, job, type) {
       }
 
       const url = candidates[index];
-      console.log("🎯 후보:", candidates[index]);
-
       const testImg = new Image();
+
       testImg.onload = () => {
-        console.log("✅ 성공:", url);
-        imgEl.src = url + '?v=' + Date.now();  // 캐시 방지
+        console.log(`✅ 로드 성공: ${url}`);
+        imgEl.src = url;
       };
       testImg.onerror = () => {
-        console.warn("❌ 실패:", url);
+        console.warn(`❌ 실패: ${url}`);
         index++;
         tryNext();
       };
@@ -365,8 +365,9 @@ function getSkillImageTag(skillName, job, type) {
     };
 
     tryNext();
-  }, 100);
+  };
 
+  setTimeout(ensureImgReady, 0);
   return html;
 }
 
