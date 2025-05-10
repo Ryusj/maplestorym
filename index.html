@@ -29,8 +29,6 @@
     position: relative;
 
   }
-
-
   </style>
 </head>
 <body>
@@ -63,7 +61,13 @@
         <input type="password" id="apiKey" class="form-control" placeholder="발급받은 API 토큰">
       </div>
       <button class="btn btn-primary" onclick="searchCharacter()">검색</button>
-      <div id="result" class="mt-4"></div>
+      <div id="result" class="mt-4">
+        <div class="row g-4">
+          <div class="col-md-6" id="basicCard"></div>
+          <div class="col-md-6" id="statCard"></div>
+        </div>
+        <div class="mt-4" id="vmatrixCard"></div>
+      </div>
     </div>
   </div>
 
@@ -112,154 +116,164 @@
     }
 
     async function searchCharacter() {
-      const world = document.getElementById('world').value;
-      const nickname = document.getElementById('nickname').value;
-      const apiKey = document.getElementById('apiKey').value;
+  const world = document.getElementById('world').value;
+  const nickname = document.getElementById('nickname').value;
+  const apiKey = document.getElementById('apiKey').value;
 
-      const resultDiv = document.getElementById('result');
-      resultDiv.innerHTML = '';
+  const basicCard = document.getElementById("basicCard");
+  const statCard = document.getElementById("statCard");
+  const vmatrixCard = document.getElementById("vmatrixCard");
 
-      if (!world || !nickname || !apiKey) {
-        resultDiv.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
-        return;
-      }
+  // 하위 카드 초기화
+  basicCard.innerHTML = "";
+  statCard.innerHTML = "";
+  vmatrixCard.innerHTML = "";
 
-      resultDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
-
-      try {
-        const ocidResponse = await fetch(`https://open.api.nexon.com/maplestorym/v1/id?character_name=${encodeURIComponent(nickname)}&world_name=${encodeURIComponent(world)}`, {
-          headers: { 'x-nxopen-api-key': apiKey }
-        });
-        const ocidData = await ocidResponse.json();
-        const ocid = ocidData.ocid;
-
-        const endpoints = [
-          'guild',
-          'basic',
-          // 'item-equipment',
-          'stat',
-          // 'beauty-equipment',
-          // 'pet-equipment',
-          // 'skill-equipment',
-          'vmatrix'
-        ];
-
-        let html = '';
-let guildName = '';
-let characterJob = '';
-        for (const endpoint of endpoints) {
-          resultDiv.innerHTML = `<div class="spinner-border text-info" role="status"><span class="visually-hidden">Loading...</span></div><p>불러오는 중: /character/${endpoint}</p>`;
-
-          const res = await fetch(`https://open.api.nexon.com/maplestorym/v1/character/${endpoint}?ocid=${ocid}`, {
-            headers: { 'x-nxopen-api-key': apiKey }
-          });
-          const data = await res.json();
-
-          if (endpoint === 'guild') {
-            guildName = data.guild_name || '';
-          }
-
-          if (endpoint === 'basic') {
-  characterJob = data.character_class || data.character_job_name || '';
-  const genderKo = data.character_gender === 'Male' ? '남' : data.character_gender === 'Female' ? '여' : data.character_gender;
-  const formattedExp = `${formatNumber(data.character_exp)} ${formatKoreanExp(data.character_exp)}`;
-  html += `
-              <div class="card mb-4">
-                <div class="card-body">
-                  <h5 class="card-title">${data.character_name}</h5>
-                  <img src="images/world/${data.world_name}.png" alt="${data.world_name}" class="world-icon">${data.world_name} | Lv.${data.character_level} | ${data.character_job_name}${guildName ? ` | ${guildName}` : ''}</h6>
-                  <p class="card-text">
-                    성별 : ${genderKo}<br>
-                    생성일 : ${formatDate(data.character_date_create)}<br>
-                    경험치 : ${formattedExp}<br>
-                    최근 접속 시간 : ${formatDate(data.character_date_last_login)}<br>
-                    최근 접속종료 시간 : ${formatDate(data.character_date_last_logout)}
-                  </p>
-                </div>
-              </div>
-              `;
-          } else if (endpoint === 'stat') {
-  html += `
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">스탯 정보</h5>
-        <ul class="list-group list-group-flush">
-          ${data.stat.map(stat => `<li class=\"list-group-item\">${stat.stat_name} : ${formatNumber(stat.stat_value)}</li>`).join('')}
-        </ul>
-      </div>
-    </div>
-    `;
-} else if (endpoint === 'vmatrix') {
-  const cores = data.character_v_core_equipment;
-  let vMatrixHTML = `
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">V 매트릭스</h5>
-        <div class="d-flex flex-wrap gap-3">
-  `;
-
-  let enhancementMap = {};
-
-  for (const core of cores) {
-    const { v_core_type, v_core_level, slot_level, v_core_name } = core;
-    const totalLevel = v_core_level + slot_level;
-
-    if (v_core_type === 'Skill') {
-      const icon = getSkillImageTag(v_core_name, characterJob, 'Skill');
-      vMatrixHTML += `
-        <div class="text-center">
-          <div>Lv. ${totalLevel}</div>
-          ${icon}
-        </div>
-      `;
-    } else if (v_core_type === 'Special') {
-      const icon = getSkillImageTag(v_core_name, characterJob, 'Special');
-      vMatrixHTML += `
-        <div class="text-center">
-          <div>Lv. ${v_core_level}</div>
-          ${icon}
-        </div>
-      `;
-    } else if (v_core_type === 'Enhancement') {
-      const skills = [
-        core.v_core_skill_name_1,
-        core.v_core_skill_name_2,
-        core.v_core_skill_name_3
-      ].filter(n => n !== '(Unknown)');
-      for (const name of skills) {
-        if (!enhancementMap[name]) enhancementMap[name] = 0;
-        enhancementMap[name] += totalLevel;
-      }
-    }
+  if (!world || !nickname || !apiKey) {
+    vmatrixCard.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
+    return;
   }
 
-  for (const [skillName, level] of Object.entries(enhancementMap)) {
-    const icon = getSkillImageTag(skillName, characterJob, 'Enhancement');
-    vMatrixHTML += `
-      <div class="text-center">
-        <div>Lv. ${Math.min(level, 60)}</div>
-        ${icon}
-      </div>
-    `;
-  }
+  vmatrixCard.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
 
-  const enhancementTotal = Object.values(enhancementMap).reduce((a, b) => a + Math.min(b, 60), 0);
+  try {
+    const ocidResponse = await fetch(`https://open.api.nexon.com/maplestorym/v1/id?character_name=${encodeURIComponent(nickname)}&world_name=${encodeURIComponent(world)}`, {
+      headers: { 'x-nxopen-api-key': apiKey }
+    });
+    const ocidData = await ocidResponse.json();
+    const ocid = ocidData.ocid;
 
-  html += vMatrixHTML;
-} else if (endpoint !== 'guild') {
-  html += `<h5>/character/${endpoint} 결과</h5><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    const endpoints = ['guild', 'basic', 'stat', 'vmatrix'];
+    let guildName = '';
+    let characterJob = '';
+
+    let enhancementMap = {};
+
+    for (const endpoint of endpoints) {
+      const res = await fetch(`https://open.api.nexon.com/maplestorym/v1/character/${endpoint}?ocid=${ocid}`, {
+        headers: { 'x-nxopen-api-key': apiKey }
+      });
+      const data = await res.json();
+
+      if (endpoint === 'guild') {
+        guildName = data.guild_name || '';
+      }
+
+      if (endpoint === 'basic') {
+        characterJob = data.character_class || data.character_job_name || '';
+        const genderKo = data.character_gender === 'Male' ? '남' : data.character_gender === 'Female' ? '여' : data.character_gender;
+        const formattedExp = `${formatNumber(data.character_exp)} ${formatKoreanExp(data.character_exp)}`;
+        basicCard.innerHTML = `
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">기본 정보</h5>
+              <h6 class="fs-5 fw-semibold ms-2 mb-0">${data.character_name}</h6>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  <img src="images/world/${data.world_name}.png" alt="${data.world_name}" class="world-icon">
+                  ${data.world_name} | Lv.${data.character_level} | ${data.character_job_name}${guildName ? ` | ${guildName}` : ''}
+                </li>
+                <li class="list-group-item">성별 : ${genderKo}</li>
+                <li class="list-group-item">생성일: ${formatDate(data.character_date_create)}</li>
+                <li class="list-group-item">경험치: ${formattedExp}</li>
+                <li class="list-group-item">최근 접속 시간: ${formatDate(data.character_date_last_login)}</li>
+                <li class="list-group-item">최근 접속종료 시간: ${formatDate(data.character_date_last_logout)}</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      else if (endpoint === 'stat') {
+        statCard.innerHTML = `
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">스탯 정보</h5>
+              <ul class="list-group list-group-flush">
+                ${data.stat.map(stat => `<li class="list-group-item">${stat.stat_name} : ${formatNumber(stat.stat_value)}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      else if (endpoint === 'vmatrix') {
+        const cores = data.character_v_core_equipment;
+        let vMatrixHTML = `
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">V 매트릭스</h5>
+              <div class="d-flex flex-wrap gap-3">
+        `;
+
+        let skillCores = [];
+        let enhancementMap = {};
+        let specialCores = [];
+
+        for (const core of cores) {
+          const { v_core_type, v_core_level, slot_level, v_core_name } = core;
+          const totalLevel = v_core_level + slot_level;
+
+          if (v_core_type === 'Skill') {
+            skillCores.push({ name: v_core_name, level: totalLevel });
+          } else if (v_core_type === 'Special') {
+            specialCores.push({ name: v_core_name, level: v_core_level });
+          } else if (v_core_type === 'Enhancement') {
+            const skills = [
+              core.v_core_skill_name_1,
+              core.v_core_skill_name_2,
+              core.v_core_skill_name_3
+            ].filter(n => n !== '(Unknown)');
+            for (const name of skills) {
+              if (!enhancementMap[name]) enhancementMap[name] = 0;
+              enhancementMap[name] += totalLevel;
+            }
           }
-
-          await delay(500);
         }
 
-        resultDiv.innerHTML = html;
+        // 출력 순서: Skill → Enhancement → Special
+        for (const { name, level } of skillCores) {
+          const icon = getSkillImageTag(name, characterJob, 'Skill');
+          vMatrixHTML += `
+            <div class="text-center">
+              <div>Lv. ${level}</div>
+              ${icon}
+            </div>
+          `;
+        }
 
-      } catch (error) {
-        resultDiv.innerHTML = '<div class="alert alert-danger">캐릭터 정보를 불러오지 못했습니다.</div>';
-        console.error(error);
+        for (const [skillName, level] of Object.entries(enhancementMap)) {
+          const icon = getSkillImageTag(skillName, characterJob, 'Enhancement');
+          vMatrixHTML += `
+            <div class="text-center">
+              <div>Lv. ${Math.min(level, 60)}</div>
+              ${icon}
+            </div>
+          `;
+        }
+
+        for (const { name, level } of specialCores) {
+          const icon = getSkillImageTag(name, characterJob, 'Special');
+          vMatrixHTML += `
+            <div class="text-center">
+              <div>Lv. ${level}</div>
+              ${icon}
+            </div>
+          `;
+        }
+
+        vmatrixCard.innerHTML = vMatrixHTML;
       }
+
+      await delay(300);
     }
+
+  } catch (error) {
+    document.getElementById("vmatrixCard").innerHTML = '<div class="alert alert-danger">캐릭터 정보를 불러오지 못했습니다.</div>';
+    console.error(error);
+  }
+}
+
   
     function getJobDetail(job) {
       const detail = [];
