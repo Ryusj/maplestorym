@@ -249,14 +249,6 @@ let characterJob = '';
 
   const enhancementTotal = Object.values(enhancementMap).reduce((a, b) => a + Math.min(b, 60), 0);
 
-  vMatrixHTML += `
-        </div>
-        <hr>
-        <div><strong>강화코어 총합 레벨:</strong> ${enhancementTotal}</div>
-      </div>
-    </div>
-  `;
-
   html += vMatrixHTML;
 } else if (endpoint !== 'guild') {
   html += `<h5>/character/${endpoint} 결과</h5><pre>${JSON.stringify(data, null, 2)}</pre>`;
@@ -315,11 +307,12 @@ let characterJob = '';
       } else if (type === 'Special') {
         paths.push(`images/5차스킬/특수코어/${cleanName}`);
       }
+      console.log('paths : ', paths);
 
       return paths.flatMap(path => [
-  `${encodeURI(path)}.png`,
-  `${encodeURI(path)}.webp`
-]);
+        `${encodeURI(path)}.png`,
+        `${encodeURI(path)}.webp`
+      ]);
     }
 
 function getSkillImageTag(skillName, job, type) {
