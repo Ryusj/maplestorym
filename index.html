@@ -11,48 +11,25 @@
     #result pre { background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; }
     .world-icon { width: 24px; height: 24px; margin-right: 6px; vertical-align: middle; }
     .v-icon-wrapper {
-    width: 80px;
+    width: 64px;
     text-align: center;
   }
   .v-icon-bg {
     position: relative;
-    width: 80px;
-    height: 80px;
+    width: 48px;
+    height: 48px;
     margin: 0 auto;
   }
-  .v-icon-bg img.polygon-bg {
-    width: 100%;
-  }
-  .v-icon-bg img.skill-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+
+
     .skill-icon {
     width: 48px;
     height: 48px;
     object-fit: contain;
-    position: absolute;
-    top: 16px;
-    left: 16px;
+    position: relative;
+
   }
 
-  .polygon-bg {
-    width: 80px;
-    height: 80px;
-  }
-
-  .vmatrix-name {
-    font-size: 14px;
-    max-width: 64px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-  }
 
   </style>
 </head>
@@ -68,14 +45,14 @@
       <div class="mb-3">
         <label for="world" class="form-label">월드 선택</label>
         <select id="world" class="form-select">
-  <option value="스카니아">스카니아</option>
-  <option value="루나">루나</option>
-  <option value="엘리시움">엘리시움</option>
-  <option value="크로아">크로아</option>
-  <option value="유니온">유니온</option>
-  <option value="제니스">제니스</option>
-  <option value="아케인">아케인</option>
-</select>
+          <option value="스카니아">스카니아</option>
+          <option value="루나">루나</option>
+          <option value="엘리시움">엘리시움</option>
+          <option value="크로아">크로아</option>
+          <option value="유니온">유니온</option>
+          <option value="제니스">제니스</option>
+          <option value="아케인">아케인</option>
+        </select>
       </div>
       <div class="mb-3">
         <label for="nickname" class="form-label">캐릭터 닉네임</label>
@@ -219,8 +196,6 @@ let characterJob = '';
       <div class="card-body">
         <h5 class="card-title">V 매트릭스</h5>
         <div class="d-flex flex-wrap gap-3">
-      </div>
-    </div>
   `;
 
   let enhancementMap = {};
@@ -233,7 +208,7 @@ let characterJob = '';
       const icon = getSkillImageTag(v_core_name, characterJob, 'Skill');
       vMatrixHTML += `
         <div class="text-center">
-          <div>LV.${totalLevel}</div>
+          <div>Lv. ${totalLevel}</div>
           ${icon}
         </div>
       `;
@@ -241,7 +216,7 @@ let characterJob = '';
       const icon = getSkillImageTag(v_core_name, characterJob, 'Special');
       vMatrixHTML += `
         <div class="text-center">
-          <div>LV.${v_core_level}</div>
+          <div>Lv. ${v_core_level}</div>
           ${icon}
         </div>
       `;
@@ -262,7 +237,7 @@ let characterJob = '';
     const icon = getSkillImageTag(skillName, characterJob, 'Enhancement');
     vMatrixHTML += `
       <div class="text-center">
-        <div>LV.${Math.min(level, 60)}</div>
+        <div>Lv. ${Math.min(level, 60)}</div>
         ${icon}
       </div>
     `;
@@ -298,16 +273,15 @@ let characterJob = '';
         { group: ['아델', '일리움', '칼리', '아크'], tag: '레프' },
         { group: ['라라', '호영'], tag: '아니마' },
         { group: ['제로'], tag: '초월자' },
-        { group: ['키네시스'], tag: '프렌즈 월드' }
+        { group: ['키네시스'], tag: '프렌즈 월드' },
+        { group: ['에릴', '시아'], tag: '샤인'}
       ];
       const classMap = [
         { group: ['히어로', '팔라딘', '다크나이트', '소울마스터', '미하일', '블래스터', '데몬슬레이어', '데몬어벤져', '아란', '카이저', '아델', '제로', '에릴'], tag: '전사' },
         { group: ['비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '플레임위자드', '에반', '루미너스', '배틀메이지', '일리움', '라라', '키네시스', '시아'], tag: '마법사' },
         { group: ['보우마스터', '신궁', '패스파인더', '윈드브레이커', '메르세데스', '와일드헌터', '카인'], tag: '궁수' },
-        { group: ['나이트로드', '섀도어', '듀얼블레이드', '나이트워커', '팬텀', '카데나', '칼리', '호영'], tag: '도적' },
-        { group: ['캡틴', '바이퍼', '캐논슈터', '스트라이커', '은월', '메카닉', '엔젤릭버스터', '아크'], tag: '해적' },
-        { group: ['제논'], tag: '도적' },
-        { group: ['제논'], tag: '해적' }
+        { group: ['나이트로드', '섀도어', '듀얼블레이드', '나이트워커', '팬텀', '카데나', '칼리', '호영', '제논'], tag: '도적' },
+        { group: ['캡틴', '바이퍼', '캐논슈터', '스트라이커', '은월', '메카닉', '엔젤릭버스터', '아크', '제논'], tag: '해적' }
       ];
       categoryMap.forEach(({ group, tag }) => { if (group.includes(job)) detail.push(tag); });
       classMap.forEach(({ group, tag }) => { if (group.includes(job)) detail.push(tag); });
@@ -348,7 +322,7 @@ function getSkillImageTag(skillName, job, type) {
 
   const html = `
     <div class="v-icon-wrapper" id="${wrapperId}">
-      <div class="v-icon-bg" style="position: relative; width: 80px; height: 80px;">
+      <div class="v-icon-bg" style="position: relative;">
         <img id="${imgId}" src="images/polygon.png" class="skill-icon" alt="${skillName}" title="${skillName}">
       </div>
     </div>
