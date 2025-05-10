@@ -31,6 +31,19 @@
     height: 100%;
     object-fit: contain;
   }
+    .skill-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    position: absolute;
+    top: 16px;
+    left: 16px;
+  }
+
+  .polygon-bg {
+    width: 80px;
+    height: 80px;
+  }
   </style>
 </head>
 <body>
@@ -239,7 +252,6 @@ let characterJob = '';
     const icon = getSkillImageTag(skillName, characterJob, 'Enhancement');
     vMatrixHTML += `
       <div class="text-center">
-        <img src="images/polygon.png" alt="육각형" width="80"><br>
         <div>LV.${Math.min(level, 60)}</div>
         ${icon}
         <div>${skillName}</div>
@@ -327,7 +339,7 @@ function getSkillImageTag(skillName, job, type) {
 
   const html = `
     <div class="v-icon-wrapper" id="${wrapperId}">
-      <div class="v-icon-bg">
+      <div class="v-icon-bg" style="position: relative; width: 80px; height: 80px;">
         <img src="images/polygon.png" class="polygon-bg" alt="배경">
         <img id="${imgId}" src="images/polygon.png" class="skill-icon" alt="${skillName}">
       </div>
