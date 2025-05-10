@@ -343,16 +343,24 @@ function getSkillImageTag(skillName, job, type) {
     let index = 0;
 
     const tryNext = () => {
-      if (index >= candidates.length) return;
+      if (index >= candidates.length) {
+        console.warn(`❌ 모든 후보 경로 실패: ${skillName}`);
+        return;
+      }
+
+      const url = candidates[index];
       const testImg = new Image();
+
       testImg.onload = () => {
-        imgEl.src = candidates[index];
+        console.log(`✅ 로드 성공: ${url}`);
+        imgEl.src = url;
       };
       testImg.onerror = () => {
+        console.warn(`❌ 실패: ${url}`);
         index++;
         tryNext();
       };
-      testImg.src = candidates[index];
+      testImg.src = url;
     };
 
     tryNext();
@@ -360,6 +368,7 @@ function getSkillImageTag(skillName, job, type) {
 
   return html;
 }
+
 
   </script>
 </body>
