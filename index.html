@@ -199,6 +199,7 @@ let characterJob = '';
                     최근 접속종료 시간 : ${formatDate(data.character_date_last_logout)}
                   </p>
                 </div>
+              </div>
               `;
           } else if (endpoint === 'stat') {
   html += `
@@ -209,6 +210,7 @@ let characterJob = '';
           ${data.stat.map(stat => `<li class=\"list-group-item\">${stat.stat_name} : ${formatNumber(stat.stat_value)}</li>`).join('')}
         </ul>
       </div>
+    </div>
     `;
 } else if (endpoint === 'vmatrix') {
   const cores = data.character_v_core_equipment;
@@ -217,6 +219,8 @@ let characterJob = '';
       <div class="card-body">
         <h5 class="card-title">V 매트릭스</h5>
         <div class="d-flex flex-wrap gap-3">
+      </div>
+    </div>
   `;
 
   let enhancementMap = {};
