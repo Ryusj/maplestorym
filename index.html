@@ -349,14 +349,15 @@ function getSkillImageTag(skillName, job, type) {
       }
 
       const url = candidates[index];
-      const testImg = new Image();
+      console.log("🎯 후보:", candidates[index]);
 
+      const testImg = new Image();
       testImg.onload = () => {
-        console.log(`✅ 로드 성공: ${url}`);
-        imgEl.src = url;
+        console.log("✅ 성공:", url);
+        imgEl.src = url + '?v=' + Date.now();  // 캐시 방지
       };
       testImg.onerror = () => {
-        console.warn(`❌ 실패: ${url}`);
+        console.warn("❌ 실패:", url);
         index++;
         tryNext();
       };
