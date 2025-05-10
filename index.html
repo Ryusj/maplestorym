@@ -336,8 +336,10 @@ function getSkillImageTag(skillName, job, type) {
 
   setTimeout(() => {
     const imgEl = document.getElementById(imgId);
-    if (!imgEl) return;
-
+    if (!imgEl) {
+      console.log('imgEl is not defined')
+      return;
+    }
     let index = 0;
 
     const tryNext = () => {
