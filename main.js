@@ -377,16 +377,17 @@ function downloadResultImage() {
     return;
   }
 
-  html2canvas(result, {
-    scale: 2,
+  html2canvas(document.getElementById('result'), {
+    scale: 2, // 픽셀 밀도 고정 (고해상도 저장)
+    width: 1280, // 원하는 고정 너비(px)
+    windowWidth: 1280, // 뷰포트 기준 너비도 맞춰줌
     useCORS: true
   }).then(canvas => {
     const link = document.createElement('a');
     link.download = 'character_result.png';
-    link.href = canvas.toDataURL('image/png');
+    link.href = canvas.toDataURL();
     link.click();
   }).catch(error => {
     console.error("스크린샷 생성 오류:", error);
-    alert("스크린샷 저장 중 오류가 발생했습니다.");
   });
 }
