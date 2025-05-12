@@ -371,24 +371,22 @@ function getSkillImageTag(skillName, job, type) {
 }
 
 function downloadResultImage() {
-  const result = document.getElementById('result');
-  if (!result) {
-    alert("저장할 결과가 없습니다.");
-    return;
-  }
+    const result = document.getElementById('result');
+    if (!result) {
+        alert("저장할 결과가 없습니다.");
+        return;
+    }
 
-  const target = document.getElementById('result');
-    html2canvas(target, {
-        width: target.scrollWidth,
-        height: target.scrollHeight,
-        scale: 2,
-        useCORS: true
+    html2canvas(document.getElementById('result'), {
+        width: 1280,
+        height: document.getElementById('result').scrollHeight,
+        scale: 2,        // 해상도 향상
+        useCORS: true,
+        windowWidth: 1280 // 레이아웃 계산에 필요
     }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'character_result.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  }).catch(error => {
-    console.error("스크린샷 생성 오류:", error);
-  });
+        const link = document.createElement('a');
+        link.download = 'character_result.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
 }
