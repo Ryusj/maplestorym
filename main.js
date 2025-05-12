@@ -207,6 +207,8 @@ async function searchCharacter() {
         }
 
         await delay(300);
+
+        document.getElementById("screenshotBtnContainer").style.display = "block";
     }
 
     } catch (error) {
@@ -364,4 +366,25 @@ function getSkillImageTag(skillName, job, type) {
 
     setTimeout(ensureImgReady, 0);
     return html;
+}
+
+function downloadResultImage() {
+  const result = document.getElementById('result');
+  if (!result) {
+    alert("저장할 결과가 없습니다.");
+    return;
+  }
+
+  html2canvas(result, {
+    scale: 2,
+    useCORS: true
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'character_result.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(error => {
+    console.error("스크린샷 생성 오류:", error);
+    alert("스크린샷 저장 중 오류가 발생했습니다.");
+  });
 }
