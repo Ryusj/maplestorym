@@ -377,12 +377,13 @@ function downloadResultImage() {
     return;
   }
 
-  html2canvas(document.getElementById('result'), {
-    width: target.scrollWidth,
-    height: target.scrollHeight,
-    scale: 2,
-    useCORS: true
-  }).then(canvas => {
+  const target = document.getElementById('result');
+    html2canvas(target, {
+        width: target.scrollWidth,
+        height: target.scrollHeight,
+        scale: 2,
+        useCORS: true
+    }).then(canvas => {
     const link = document.createElement('a');
     link.download = 'character_result.png';
     link.href = canvas.toDataURL();
