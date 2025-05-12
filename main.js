@@ -249,7 +249,9 @@ function getEquipmentSet(data) {
     "매커네이터 펜던트", "도미네이터 펜던트"
     ];
 
-    data.forEach(({ item_name }) => {
+    console.log(data);
+
+    data.filter(data => data.item_name).forEach(({ item_name }) => {
     if (item_name.startsWith("아케인셰이드")) {
         setOption[setOption.findIndex(set => set.setName === "아케인셰이드")].setCounts++;
     } else if (item_name.startsWith("앱솔랩스")) {
