@@ -395,13 +395,15 @@ function downloadResultImage() {
   const original = document.getElementById('result');
   const clone = original.cloneNode(true);
 
+  clone.classList.add("screenshot-mode");
+
   // 스크린샷 버튼 숨기기
     const screenshotButton = clone.querySelector('#screenshotBtn');
     if (screenshotButton) screenshotButton.remove();
 
-    // 푸터도 복제
-    const footer = document.querySelector('footer')?.cloneNode(true);
-    if (footer) clone.appendChild(footer);
+    // // 푸터도 복제
+    // const footer = document.querySelector('footer')?.cloneNode(true);
+    // if (footer) clone.appendChild(footer);
 
     // 고정 스타일 적용
     const wrapper = document.createElement('div');
