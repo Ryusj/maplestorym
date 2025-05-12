@@ -370,23 +370,65 @@ function getSkillImageTag(skillName, job, type) {
     return html;
 }
 
-function downloadResultImage() {
-    const result = document.getElementById('result');
-    if (!result) {
-        alert("저장할 결과가 없습니다.");
-        return;
-    }
+// function downloadResultImage() {
+//     const result = document.getElementById('result');
+//     if (!result) {
+//         alert("저장할 결과가 없습니다.");
+//         return;
+//     }
 
-    html2canvas(document.getElementById('result'), {
+//     html2canvas(document.getElementById('result'), {
+//         width: 1280,
+//         height: document.getElementById('result').scrollHeight,
+//         scale: 2,        // 해상도 향상
+//         useCORS: true,
+//         windowWidth: 1280 // 레이아웃 계산에 필요
+//     }).then(canvas => {
+//         const link = document.createElement('a');
+//         link.download = 'character_result.png';
+//         link.href = canvas.toDataURL();
+//         link.click();
+//     });
+// }
+
+function downloadResultImage() {
+  const original = document.getElementById('result');
+  const clone = original.cloneNode(true);
+
+  // 스크린샷 버튼 숨기기
+    const screenshotButton = clone.querySelector('#screenshotBtn');
+    if (screenshotButton) screenshotButton.remove();
+
+    // 푸터도 복제
+    const footer = document.querySelector('footer')?.cloneNode(true);
+    if (footer) clone.appendChild(footer);
+
+    // 고정 스타일 적용
+    const wrapper = document.createElement('div');
+    wrapper.style.width = '1280px';
+    wrapper.style.padding = '20px';
+    wrapper.style.background = '#fff';
+    wrapper.style.fontFamily = getComputedStyle(document.body).fontFamily;
+    wrapper.appendChild(clone);
+
+    // 숨겨진 캡처용 영역 추가
+    wrapper.style.position = 'absolute';
+    wrapper.style.left = '-9999px';
+    document.body.appendChild(wrapper);
+
+    html2canvas(wrapper, {
         width: 1280,
-        height: document.getElementById('result').scrollHeight,
-        scale: 2,        // 해상도 향상
-        useCORS: true,
-        windowWidth: 1280 // 레이아웃 계산에 필요
+        height: wrapper.scrollHeight,
+        scale: 2,
+        useCORS: true
     }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'character_result.png';
         link.href = canvas.toDataURL();
         link.click();
+        document.body.removeChild(wrapper); // 끝난 후 정리
+    }).catch(err => {
+        console.error('스크린샷 생성 오류:', err);
+        document.body.removeChild(wrapper);
     });
 }
