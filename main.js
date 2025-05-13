@@ -407,25 +407,24 @@ async function downloadResultImage() {
   const style = document.createElement("style");
   style.textContent = `
     .screenshot-mode {
-      width: 1280px !important;
-      padding: 24px;
-      box-sizing: border-box;
-      font-size: 16px;
-      background: white;
+        width: 1280px !important;
+        font-size: 16px;
+        background: white;
+        padding: 24px;
+        box-sizing: border-box;
     }
 
     .screenshot-mode .row {
-      flex-wrap: nowrap !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
     }
 
+    .screenshot-mode .col-md-4,
     .screenshot-mode .col-md-6,
-    .screenshot-mode .col-md-4 {
-      flex: 0 0 auto !important;
-      width: 33.3333% !important;
-    }
-
     .screenshot-mode .col-md-12 {
-      width: 100% !important;
+        width: auto !important;
+        flex: 1 1 0% !important;
+        max-width: unset !important;
     }
 
     .screenshot-mode #screenshotButton {
@@ -440,6 +439,9 @@ async function downloadResultImage() {
 
   // 캡처 컨테이너 생성
   const wrapper = document.createElement("div");
+  wrapper.style.width = "1280px";  // 고정
+  wrapper.style.transform = "scale(1)";
+  wrapper.style.transformOrigin = "top left";
   wrapper.style.position = "fixed";
   wrapper.style.top = "-10000px"; // 화면 밖으로
   wrapper.style.left = "0";
@@ -449,9 +451,11 @@ async function downloadResultImage() {
 
   try {
     const canvas = await html2canvas(clone, {
-      backgroundColor: "#ffffff",
-      scale: 2,
-      useCORS: true,
+        backgroundColor: "#ffffff",
+        scale: 2,
+        useCORS: true,
+        width: 1280,
+        windowWidth: 1280  // 이것도 꼭 지정
     });
 
     const dataURL = canvas.toDataURL("image/png");
