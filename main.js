@@ -391,46 +391,81 @@ function getSkillImageTag(skillName, job, type) {
 //     });
 // }
 
-function downloadResultImage() {
-  const original = document.getElementById('result');
-  const clone = original.cloneNode(true);
+async function downloadResultImage() {
+  const original = document.getElementById("result");
 
+  if (!original) {
+    alert("결과 영역이 없습니다.");
+    return;
+  }
+
+  // 캡처용 클론 생성
+  const clone = original.cloneNode(true);
   clone.classList.add("screenshot-mode");
 
-  // 스크린샷 버튼 숨기기
-    const screenshotButton = clone.querySelector('#screenshotBtn');
-    if (screenshotButton) screenshotButton.remove();
+  // 캡처용 스타일 삽입
+  const style = document.createElement("style");
+  style.textContent = `
+    .screenshot-mode {
+      width: 1280px !important;
+      padding: 24px;
+      box-sizing: border-box;
+      font-size: 16px;
+      background: white;
+    }
 
-    // // 푸터도 복제
-    // const footer = document.querySelector('footer')?.cloneNode(true);
-    // if (footer) clone.appendChild(footer);
+    .screenshot-mode .row {
+      flex-wrap: nowrap !important;
+    }
 
-    // 고정 스타일 적용
-    const wrapper = document.createElement('div');
-    wrapper.style.width = '1280px';
-    wrapper.style.padding = '20px';
-    wrapper.style.background = '#fff';
-    wrapper.style.fontFamily = getComputedStyle(document.body).fontFamily;
-    wrapper.appendChild(clone);
+    .screenshot-mode .col-md-6,
+    .screenshot-mode .col-md-4 {
+      flex: 0 0 auto !important;
+      width: 33.3333% !important;
+    }
 
-    // 숨겨진 캡처용 영역 추가
-    wrapper.style.position = 'absolute';
-    wrapper.style.left = '-9999px';
-    document.body.appendChild(wrapper);
+    .screenshot-mode .col-md-12 {
+      width: 100% !important;
+    }
 
-    html2canvas(wrapper, {
-        width: 1280,
-        height: wrapper.scrollHeight,
-        scale: 2,
-        useCORS: true
-    }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'character_result.png';
-        link.href = canvas.toDataURL();
-        link.click();
-        document.body.removeChild(wrapper); // 끝난 후 정리
-    }).catch(err => {
-        console.error('스크린샷 생성 오류:', err);
-        document.body.removeChild(wrapper);
+    .screenshot-mode #screenshotButton {
+      display: none !important;
+    }
+
+    .screenshot-mode footer {
+      display: block !important;
+    }
+  `;
+  clone.prepend(style);
+
+  // 캡처 컨테이너 생성
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "fixed";
+  wrapper.style.top = "-10000px"; // 화면 밖으로
+  wrapper.style.left = "0";
+  wrapper.style.zIndex = "-1";
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  try {
+    const canvas = await html2canvas(clone, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      useCORS: true,
     });
+
+    const dataURL = canvas.toDataURL("image/png");
+
+    const a = document.createElement("a");
+    a.href = dataURL;
+    a.download = "character_result.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error("스크린샷 생성 오류:", error);
+    alert("스크린샷 생성 중 문제가 발생했습니다.");
+  } finally {
+    document.body.removeChild(wrapper); // 정리
+  }
 }
