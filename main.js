@@ -399,6 +399,11 @@ async function downloadResultImage() {
     return;
   }
 
+  const world = document.getElementById('world').value || '월드';
+  const nickname = document.getElementById('nickname').value || '캐릭터';
+  const dateTime = getFormattedDateTime();
+  const filename = `${world}_${nickname}_${dateTime}.png`;
+
   // 캡처용 클론 생성
   const clone = original.cloneNode(true);
   clone.classList.add("screenshot-mode");
@@ -462,7 +467,7 @@ async function downloadResultImage() {
 
     const a = document.createElement("a");
     a.href = dataURL;
-    a.download = "character_result.png";
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -472,4 +477,15 @@ async function downloadResultImage() {
   } finally {
     document.body.removeChild(wrapper); // 정리
   }
+}
+
+function getFormattedDateTime() {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mi = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  return `${yyyy}${mm}${dd}_${hh}${mi}${ss}`;
 }
