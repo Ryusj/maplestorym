@@ -126,7 +126,9 @@ async function searchCharacter() {
     const statCard    = document.getElementById("statBox");
     const itemCard    = document.getElementById("itemBox");
     const vmatrixCard = document.getElementById("vmatrixBox");
-    const tabLoading = document.getElementById("tab-loading")
+    const jewelWrap   = document.getElementById("jewelWrap");
+    const symbolWrap   = document.getElementById("symbolWrap");
+    const tabLoading = document.getElementById("tab-loading");
 
     if (!basicCard || !statCard || !itemCard || !vmatrixCard) {
     console.error("DOM element missing", { basicCard, statCard, itemCard, vmatrixCard });
@@ -137,8 +139,10 @@ async function searchCharacter() {
     // 하위 카드 초기화
     basicCard.innerHTML = "";
     statCard.innerHTML = "";
-    // itemCard.innerHTML = "";
+    itemCard.innerHTML = "";
     vmatrixCard.innerHTML = "";
+    jewelWrap.classList.add("d-none");
+    symbolWrap.classList.add("d-none");
 
     if (!world || !nickname || !apiKey) {
     tabLoading.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
@@ -154,7 +158,8 @@ async function searchCharacter() {
     const ocidData = await ocidResponse.json();
     const ocid = ocidData.ocid;
 
-    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'cashitem-equipment', 'vmatrix', 'symbol', 'set-effect', 'jewel', 'link-skill', 'hexamatrix-skill', 'hexamatrix-stat', 'android-equipment', 'beauty-equipment', 'skill-equipment', 'pet-equipment'];
+    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'vmatrix', 'set-effect', 'jewel', 'symbol'];
+    // const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'cashitem-equipment', 'vmatrix', 'symbol', 'set-effect', 'jewel', 'link-skill', 'hexamatrix-skill', 'hexamatrix-stat', 'android-equipment', 'beauty-equipment', 'skill-equipment', 'pet-equipment'];
     let guildName = '';
     let characterJob = '';
 
@@ -170,8 +175,6 @@ async function searchCharacter() {
         await delay(300);
     }
     tabLoading.innerHTML = '';
-    console.log(apiData);
-
     
     guildName = apiData["guild"].guild_name || '';
 
@@ -195,7 +198,7 @@ async function searchCharacter() {
                     ${apiData["basic"].world_name}</span>`}
                 </div>
 
-                <!-- 2줄: 월드/레벨/직업/길드 -->
+                <!-- 2줄: 레벨/직업/길드 -->
                 <div class="text-body-secondary small mt-1">
                     Lv.${apiData["basic"].character_level}
                     ${apiData["basic"].character_job_name ? ` | ${apiData["basic"].character_job_name}` : ''}
@@ -228,7 +231,7 @@ async function searchCharacter() {
                 </li>
                 <li class="list-group-item px-0 d-flex">
                 <div class="text-secondary" style="min-width:7rem">경험치</div>
-                <div class="flex-grow-1">${formatNumber(apiData["basic"].character_exp)} ${formatKoreanExp(apiData["basic"].character_exp)}</div>
+                <div class="flex-grow-1">${formattedExp}</div>
                 </li>
                 <li class="list-group-item px-0 d-flex">
                 <div class="text-secondary" style="min-width:7rem">최근 접속</div>
@@ -272,7 +275,11 @@ async function searchCharacter() {
     //     </div>
     // `;
 
-    renderItemEquip(apiData["item-equipment"]);
+    renderJewels(apiData["jewel"]);
+
+    renderSymbols(apiData["symbol"]);
+
+    renderItemEquip(apiData["item-equipment"], apiData["set-effect"]);
 
     const cores = apiData["vmatrix"].character_v_core_equipment;
     let vMatrixHTML = `
@@ -709,12 +716,12 @@ function renderItemCard(item, job) {
 }
 
 // item_equipment 배열을 2열 그리드에 렌더
-function renderItemEquip(resp) {
-  const grid = document.getElementById('itemGrid');
+function renderItemEquip(equipment, set) {
+  const grid = document.getElementById('itemBox');
   if (!grid) return;
 
-  const jobName = resp.character_class;
-  let items = (resp && Array.isArray(resp.item_equipment)) ? resp.item_equipment : [];
+  const jobName = equipment.character_class;
+  let items = (equipment && Array.isArray(equipment.item_equipment)) ? equipment.item_equipment : [];
 
   // ✅ 원하는 순서대로 정렬
   items.sort((a, b) => {
@@ -724,5 +731,113 @@ function renderItemEquip(resp) {
     return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
   });
 
-  grid.innerHTML = items.map(item => renderItemCard(item, jobName)).join('');
+  let setEffect = (set && Array.isArray(set.set_info)) ? set.set_info : [];
+
+  grid.innerHTML = `
+  <div class="card h-100">
+    <div class="card-body">
+        <h5 class="card-title">장비 정보</h5>
+        <div id="itemGrid" class="item-grid">
+        ${items.map(item => renderItemCard(item, jobName)).join('')}
+        </div>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">세트 옵션 정보</h5>
+            <ul class="list-group list-group-flush">
+            ${setEffect.map(set => `<li class="list-group-item">${set.set_name} ${set.set_count}세트</li>`).join(' ')}
+            </ul>
+    </div>
+  </div>`
+}
+
+function renderJewels(jewelData) {
+  const wrap = document.getElementById("jewelWrap");
+  const btnContainer = document.getElementById("jewelPageBtns");
+  const grid = document.getElementById("jewelGrid");
+  const setOpt = document.getElementById("jewelSetOption");
+
+  if (!jewelData || !Array.isArray(jewelData.jewel_equipment)) {
+    wrap.classList.add("d-none");
+    return;
+  }
+
+  const pages = jewelData.jewel_equipment;
+  const defaultPage = jewelData.use_jewel_page_no || 1;
+  let currentPage = defaultPage;
+
+  // 페이지 버튼 만들기
+  btnContainer.innerHTML = pages.map(p =>
+    `<button type="button" class="btn btn-sm btn-outline-primary ${p.jewel_page_no === currentPage ? 'active' : ''}"
+      data-page="${p.jewel_page_no}">
+      ${p.jewel_page_no}
+    </button>`
+  ).join('');
+
+  // 버튼 클릭 시 페이지 전환
+  btnContainer.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentPage = parseInt(btn.dataset.page, 10);
+      btnContainer.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      drawPage(currentPage);
+    });
+  });
+
+  function drawPage(pageNo) {
+    const page = pages.find(p => p.jewel_page_no === pageNo);
+    if (!page) return;
+
+    // 보석 렌더링
+    grid.innerHTML = page.jewel_info.map(j =>
+      `<div class="jewel-card">
+         <img src="${j.jewel_icon}" alt="${j.jewel_name}">
+         <div class="jewel-card-name">${j.jewel_name}</div>
+         <div class="jewel-card-option">${j.jewel_option}</div>
+       </div>`
+    ).join('');
+
+    // ✅ 세트옵션은 현재 페이지가 기본 페이지일 때만 보이기
+    if (pageNo === defaultPage && jewelData.use_jewel_set_option) {
+      setOpt.textContent = jewelData.use_jewel_set_option;
+      setOpt.classList.remove("d-none");
+    } else {
+      setOpt.textContent = "";
+      setOpt.classList.add("d-none");
+    }
+  }
+
+  // 처음 페이지 렌더
+  drawPage(currentPage);
+  wrap.classList.remove("d-none");
+}
+
+function renderSymbols(symbolData) {
+  const wrap = document.getElementById("symbolWrap");
+  const arcaneGrid = document.getElementById("arcaneSymbolGrid");
+  const authenticGrid = document.getElementById("authenticSymbolGrid");
+  const arcaneBody = document.getElementById("arcaneBody");
+  const authenticBody = document.getElementById("authenticBody");
+
+  if (!symbolData || !Array.isArray(symbolData.arcane_symbol) || !Array.isArray(symbolData.authentic_symbol)) {
+    wrap.classList.add("d-none");
+    return;
+  }
+
+  function drawSymbol(grid, body, symbol) {
+    if (symbol.length === 0) {
+        body.classList.add("d-none");
+        return;
+    }
+    grid.innerHTML = symbol.map(s =>
+      `<div class="symbol-card">
+         <img src="${s.symbol_icon}" alt="${s.symbol_name}">
+         <div class="symbol-card-level">Lv.${s.symbol_level}</div>
+       </div>`
+    ).join('');
+    body.classList.remove("d-none");
+  }
+
+  drawSymbol(arcaneGrid, arcaneBody, symbolData.arcane_symbol);
+  drawSymbol(authenticGrid, authenticBody, symbolData.authentic_symbol);
+  wrap.classList.remove("d-none");
 }
