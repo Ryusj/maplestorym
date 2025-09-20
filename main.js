@@ -1,3 +1,79 @@
+const equipmentOrder = [
+  "무기",
+  "보조무기",
+  "엠블렘",
+  "모자",
+  "상의",
+  "하의",
+  "한벌옷",
+  "장갑",
+  "신발",
+  "어깨",
+  "망토",
+  "벨트",
+  "목걸이",
+  "목걸이 (2번째 슬롯)",
+  "얼굴장식",
+  "눈장식",
+  "귀고리",
+  "뱃지",
+  "포켓",
+  "반지",
+  "반지 (2번째 슬롯)",
+  "반지 (3번째 슬롯)",
+  "반지 (4번째 슬롯)"
+];
+
+const validAdditionalOptionPhysics = [
+    "물리 대미지",
+    "최종 대미지",
+    "방어율 무시",
+    "물리 공격력"
+]
+
+const validAdditionalOptionMagic = [
+    "마법 대미지",
+    "최종 대미지",
+    "방어율 무시",
+    "마법 공격력"
+]
+
+const validPotentialOptionPhysics = [
+    "물리 대미지",
+    "보스 공격력",
+    "최대 HP"
+]
+
+const validPotentialOptionMagic = [
+    "마법 대미지",
+    "보스 공격력",
+    "최대 HP"
+]
+
+const categoryMap = [
+    { group: ['히어로', '팔라딘', '다크나이트', '비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '보우마스터', '신궁', '패스파인더', '나이트로드', '섀도어', '듀얼블레이드', '캡틴', '바이퍼', '캐논슈터'], tag: '모험가' },
+    { group: ['소울마스터', '미하일', '플레임위자드', '윈드브레이커', '나이트워커', '스트라이커'], tag: '시그너스기사단' },
+    { group: ['아란', '에반', '메르세데스', '팬텀', '루미너스', '은월'], tag: '영웅' },
+    { group: ['블래스터', '배틀메이지', '와일드헌터', '제논', '메카닉'], tag: '레지스탕스' },
+    { group: ['데몬슬레이어', '데몬어벤져'], tag: '데몬' },
+    { group: ['카이저', '카데나', '카인', '엔젤릭버스터'], tag: '노바' },
+    { group: ['아델', '일리움', '칼리', '아크'], tag: '레프' },
+    { group: ['라라', '호영', '렌'], tag: '아니마' },
+    { group: ['제로'], tag: '초월자' },
+    { group: ['키네시스'], tag: '프렌즈 월드' },
+    { group: ['에릴', '시아', '아이엘'], tag: '샤인'}
+];
+
+const classMap = [
+    { group: ['히어로', '팔라딘', '다크나이트', '소울마스터', '미하일', '블래스터', '데몬슬레이어', '데몬어벤져', '아란', '카이저', '아델', '제로', '에릴', '렌'], tag: '전사' },
+    { group: ['비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '플레임위자드', '에반', '루미너스', '배틀메이지', '일리움', '라라', '키네시스', '시아'], tag: '마법사' },
+    { group: ['보우마스터', '신궁', '패스파인더', '윈드브레이커', '메르세데스', '와일드헌터', '카인', '아이엘'], tag: '궁수' },
+    { group: ['나이트로드', '섀도어', '듀얼블레이드', '나이트워커', '팬텀', '카데나', '칼리', '호영', '제논'], tag: '도적' },
+    { group: ['캡틴', '바이퍼', '캐논슈터', '스트라이커', '은월', '메카닉', '엔젤릭버스터', '아크', '제논'], tag: '해적' }
+];
+
+const magicJob = ['비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '플레임위자드', '에반', '루미너스', '배틀메이지', '일리움', '라라', '키네시스', '시아', '캡틴', '메카닉', '엔젤릭버스터']
+
 function openTab(tabId) {
     const tabs = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => tab.classList.remove('active'));
@@ -46,23 +122,30 @@ async function searchCharacter() {
     const nickname = document.getElementById('nickname').value;
     const apiKey = document.getElementById('apiKey').value;
 
-    const basicCard = document.getElementById("basicCard");
-    const statCard = document.getElementById("statCard");
-    const itemCard = document.getElementById("itemCard");
-    const vmatrixCard = document.getElementById("vmatrixCard");
+    const basicCard   = document.getElementById("basicBox");
+    const statCard    = document.getElementById("statBox");
+    const itemCard    = document.getElementById("itemBox");
+    const vmatrixCard = document.getElementById("vmatrixBox");
+    const tabLoading = document.getElementById("tab-loading")
+
+    if (!basicCard || !statCard || !itemCard || !vmatrixCard) {
+    console.error("DOM element missing", { basicCard, statCard, itemCard, vmatrixCard });
+    alert("결과 영역 ID를 확인해주세요.");
+    return; // 여기서 중단
+    }
 
     // 하위 카드 초기화
     basicCard.innerHTML = "";
     statCard.innerHTML = "";
-    itemCard.innerHTML = "";
+    // itemCard.innerHTML = "";
     vmatrixCard.innerHTML = "";
 
     if (!world || !nickname || !apiKey) {
-    vmatrixCard.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
+    tabLoading.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
     return;
     }
 
-    vmatrixCard.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+    tabLoading.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
 
     try {
     const ocidResponse = await fetch(`https://open.api.nexon.com/maplestorym/v1/id?character_name=${encodeURIComponent(nickname)}&world_name=${encodeURIComponent(world)}`, {
@@ -71,11 +154,11 @@ async function searchCharacter() {
     const ocidData = await ocidResponse.json();
     const ocid = ocidData.ocid;
 
-    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'vmatrix'];
+    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'cashitem-equipment', 'vmatrix', 'symbol', 'set-effect', 'jewel', 'link-skill', 'hexamatrix-skill', 'hexamatrix-stat', 'android-equipment', 'beauty-equipment', 'skill-equipment', 'pet-equipment'];
     let guildName = '';
     let characterJob = '';
 
-    let enhancementMap = {};
+    const apiData = {};
 
     for (const endpoint of endpoints) {
         const res = await fetch(`https://open.api.nexon.com/maplestorym/v1/character/${endpoint}?ocid=${ocid}`, {
@@ -83,136 +166,186 @@ async function searchCharacter() {
         });
         const data = await res.json();
 
-        if (endpoint === 'guild') {
-        guildName = data.guild_name || '';
-        }
-
-        if (endpoint === 'basic') {
-        characterJob = data.character_class || data.character_job_name || '';
-        const genderKo = data.character_gender === 'Male' ? '남' : data.character_gender === 'Female' ? '여' : data.character_gender;
-        const formattedExp = `${formatNumber(data.character_exp)} ${formatKoreanExp(data.character_exp)}`;
-        basicCard.innerHTML = `
-            <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">기본 정보</h5>
-                <h6 class="fs-5 fw-semibold ms-2 mb-0">${data.character_name}</h6>
-                <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <img src="images/world/${data.world_name}.png" alt="${data.world_name}" class="world-icon">
-                    ${data.world_name} | Lv.${data.character_level} | ${data.character_job_name}${guildName ? ` | ${guildName}` : ''}
-                </li>
-                <li class="list-group-item">성별 : ${genderKo}</li>
-                <li class="list-group-item">생성일: ${formatDate(data.character_date_create)}</li>
-                <li class="list-group-item">경험치: ${formattedExp}</li>
-                <li class="list-group-item">최근 접속 시간: ${formatDate(data.character_date_last_login)}</li>
-                <li class="list-group-item">최근 접속종료 시간: ${formatDate(data.character_date_last_logout)}</li>
-                </ul>
-            </div>
-            </div>
-        `;
-        }
-
-        else if (endpoint === 'stat') {
-        statCard.innerHTML = `
-            <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">스탯 정보</h5>
-                <ul class="list-group list-group-flush">
-                ${data.stat.map(stat => `<li class="list-group-item">${stat.stat_name} : ${formatNumber(stat.stat_value)}</li>`).join('')}
-                </ul>
-            </div>
-            </div>
-        `;
-        }
-
-        else if (endpoint === 'item-equipment') {
-        itemCard.innerHTML = `
-            <div class="card h-100">
-            <div class="card-body">
-                <h5 class="card-title">주요 장비 세트</h5>
-                <ul class="list-group list-group-flush">
-                ${getEquipmentSet(data.item_equipment).filter(data => data.setCounts > 0).map(equipment => `<li class="list-group-item">${equipment.setName} ${equipment.setCounts}세트</li>`).join('')}
-                </ul>
-            </div>
-            </div>
-        `;
-        }
-
-        else if (endpoint === 'vmatrix') {
-        const cores = data.character_v_core_equipment;
-        let vMatrixHTML = `
-            <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">V 매트릭스</h5>
-                <div class="d-flex flex-wrap gap-3">
-        `;
-
-        let skillCores = [];
-        let enhancementMap = {};
-        let specialCores = [];
-
-        for (const core of cores) {
-            const { v_core_type, v_core_level, slot_level, v_core_name } = core;
-            const totalLevel = v_core_level + slot_level;
-
-            if (v_core_type === 'Skill') {
-            skillCores.push({ name: v_core_name, level: totalLevel });
-            } else if (v_core_type === 'Special') {
-            specialCores.push({ name: v_core_name, level: v_core_level });
-            } else if (v_core_type === 'Enhancement') {
-            const skills = [
-                core.v_core_skill_name_1,
-                core.v_core_skill_name_2,
-                core.v_core_skill_name_3
-            ].filter(n => n !== '(Unknown)');
-            for (const name of skills) {
-                if (!enhancementMap[name]) enhancementMap[name] = 0;
-                enhancementMap[name] += totalLevel;
-            }
-            }
-        }
-
-        // 출력 순서: Skill → Enhancement → Special
-        for (const { name, level } of skillCores) {
-            const icon = getSkillImageTag(name, characterJob, 'Skill');
-            vMatrixHTML += `
-            <div class="text-center">
-                <div>Lv. ${level}</div>
-                ${icon}
-            </div>
-            `;
-        }
-
-        for (const [skillName, level] of Object.entries(enhancementMap)) {
-            const icon = getSkillImageTag(skillName, characterJob, 'Enhancement');
-            vMatrixHTML += `
-            <div class="text-center">
-                <div>Lv. ${Math.min(level, 60)}</div>
-                ${icon}
-            </div>
-            `;
-        }
-
-        for (const { name, level } of specialCores) {
-            const icon = getSkillImageTag(name, characterJob, 'Special');
-            vMatrixHTML += `
-            <div class="text-center">
-                <div>Lv. ${level}</div>
-                ${icon}
-            </div>
-            `;
-        }
-
-        vmatrixCard.innerHTML = vMatrixHTML;
-        }
-
+        apiData[endpoint] = data;
         await delay(300);
+    }
+    tabLoading.innerHTML = '';
+    console.log(apiData);
 
-        document.getElementById("screenshotBtnContainer").style.display = "block";
+    
+    guildName = apiData["guild"].guild_name || '';
+
+    characterJob = apiData["basic"].character_class || apiData["basic"].character_job_name || '';
+    const genderKo = apiData["basic"].character_gender === 'Male' ? '남' : apiData["basic"].character_gender === 'Female' ? '여' : apiData["basic"].character_gender;
+    const formattedExp = `${formatNumber(apiData["basic"].character_exp)} ${formatKoreanExp(apiData["basic"].character_exp)}`;
+    basicCard.innerHTML = `
+        <div class="card h-100">
+            <div class="card-body py-3">
+            <!-- 헤더: 이름 + 길드/칭호 배지 영역 -->
+            <div class="d-flex align-items-start gap-3">
+                <!-- 왼쪽: 동그란 아바타 -->
+                <img src="${apiData["basic"].character_image}" alt="${apiData["basic"].character_name}" class="avatar-clip shadow-sm">
+
+                <!-- 오른쪽: 정보 영역 -->
+                <div class="flex-grow-1">
+                <!-- 1줄: 닉네임 + 서버 아이콘/칭호 -->
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0 fw-semibold">${apiData["basic"].character_name}</h5>
+                    ${`<span class="badge text-bg-light border"><img src="images/world/${apiData["basic"].world_name}.png" class="world-icon" alt="${apiData["basic"].world_name}">
+                    ${apiData["basic"].world_name}</span>`}
+                </div>
+
+                <!-- 2줄: 월드/레벨/직업/길드 -->
+                <div class="text-body-secondary small mt-1">
+                    Lv.${apiData["basic"].character_level}
+                    ${apiData["basic"].character_job_name ? ` | ${apiData["basic"].character_job_name}` : ''}
+                    ${guildName ? ` | <span class="text-primary-emphasis">${guildName}</span>` : ''}
+                </div>
+
+                <!-- 3줄: “뱃지” 스타일 요약(원하는 항목만) -->
+                <div class="mt-2 d-flex flex-wrap gap-2">
+                <!--
+                    ${apiData["basic"].total_rank ? `<span class="badge badge-pill-light">종합랭킹 ${apiData["basic"].total_rank}</span>` : ''}
+                    ${apiData["basic"].server_class_rank ? `<span class="badge badge-pill-light">서버/직업랭킹 ${apiData["basic"].server_class_rank}</span>` : ''}
+                    ${apiData["basic"].union_level ? `<span class="badge bg-primary-subtle text-primary-emphasis border">유니온 ${apiData["basic"].union_level}</span>` : ''}
+                    ${apiData["basic"].dojo ? `<span class="badge bg-danger-subtle text-danger-emphasis border">무릉도장 ${apiData["basic"].dojo}층</span>` : ''} -->
+                </div>
+                </div>
+            </div>
+
+            <!-- 구분선 -->
+            <hr class="my-3">
+
+            <!-- 상세 표 (왼쪽에 보이던 리스트를 여기 배치) -->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item px-0 d-flex">
+                <div class="text-secondary" style="min-width:7rem">성별</div>
+                <div class="flex-grow-1">${genderKo}</div>
+                </li>
+                <li class="list-group-item px-0 d-flex">
+                <div class="text-secondary" style="min-width:7rem">생성일</div>
+                <div class="flex-grow-1">${formatDate(apiData["basic"].character_date_create)}</div>
+                </li>
+                <li class="list-group-item px-0 d-flex">
+                <div class="text-secondary" style="min-width:7rem">경험치</div>
+                <div class="flex-grow-1">${formatNumber(apiData["basic"].character_exp)} ${formatKoreanExp(apiData["basic"].character_exp)}</div>
+                </li>
+                <li class="list-group-item px-0 d-flex">
+                <div class="text-secondary" style="min-width:7rem">최근 접속</div>
+                <div class="flex-grow-1">${formatDate(apiData["basic"].character_date_last_login)}</div>
+                </li>
+                <li class="list-group-item px-0 d-flex">
+                <div class="text-secondary" style="min-width:7rem">최근 종료</div>
+                <div class="flex-grow-1">${formatDate(apiData["basic"].character_date_last_logout)}</div>
+                </li>
+            </ul>
+
+            <!-- (선택) 하단 아이콘 띠 -->
+            ${apiData["basic"].profile_icons ? `
+                <div class="mt-3 d-flex align-items-center gap-2">
+                ${apiData["basic"].profile_icons.map(src => `<img src="${src}" alt="" height="28">`).join('')}
+                </div>
+            ` : ''}
+            </div>
+        </div>
+        `;
+
+    statCard.innerHTML = `
+        <div class="card h-100">
+        <div class="card-body">
+            <h5 class="card-title">스탯 정보</h5>
+            <ul class="list-group list-group-flush">
+            ${apiData["stat"].stat.map(stat => `<li class="list-group-item">${stat.stat_name} : ${formatNumber(stat.stat_value)}</li>`).join('')}
+            </ul>
+        </div>
+        </div>
+    `;
+
+    // itemCard.innerHTML = `
+    //     <div class="card h-100">
+    //     <div class="card-body">
+    //         <h5 class="card-title">장착 장비</h5>
+    //         <ul class="list-group list-group-flush">
+    //         ${getEquipmentSet(apiData["item-equipment"].item_equipment).filter(data => data.setCounts > 0).map(equipment => `<li class="list-group-item">${equipment.setName} ${equipment.setCounts}세트</li>`).join('')}
+    //         </ul>
+    //     </div>
+    //     </div>
+    // `;
+
+    renderItemEquip(apiData["item-equipment"]);
+
+    const cores = apiData["vmatrix"].character_v_core_equipment;
+    let vMatrixHTML = `
+        <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">V 매트릭스</h5>
+            <div class="d-flex flex-wrap gap-3">
+    `;
+
+    let skillCores = [];
+    let enhancementMap = {};
+    let specialCores = [];
+
+    for (const core of cores) {
+        const { v_core_type, v_core_level, slot_level, v_core_name } = core;
+        const totalLevel = v_core_level + slot_level;
+
+        if (v_core_type === 'Skill') {
+        skillCores.push({ name: v_core_name, level: totalLevel });
+        } else if (v_core_type === 'Special') {
+        specialCores.push({ name: v_core_name, level: v_core_level });
+        } else if (v_core_type === 'Enhancement') {
+        const skills = [
+            core.v_core_skill_name_1,
+            core.v_core_skill_name_2,
+            core.v_core_skill_name_3
+        ].filter(n => n !== '(Unknown)');
+        for (const name of skills) {
+            if (!enhancementMap[name]) enhancementMap[name] = 0;
+            enhancementMap[name] += totalLevel;
+        }
+        }
     }
 
+    // 출력 순서: Skill → Enhancement → Special
+    for (const { name, level } of skillCores) {
+        const icon = getSkillImageTag(name, characterJob, 'Skill');
+        vMatrixHTML += `
+        <div class="text-center">
+            <div>Lv. ${level}</div>
+            ${icon}
+        </div>
+        `;
+    }
+
+    for (const [skillName, level] of Object.entries(enhancementMap)) {
+        const icon = getSkillImageTag(skillName, characterJob, 'Enhancement');
+        vMatrixHTML += `
+        <div class="text-center">
+            <div>Lv. ${Math.min(level, 60)}</div>
+            ${icon}
+        </div>
+        `;
+    }
+
+    for (const { name, level } of specialCores) {
+        const icon = getSkillImageTag(name, characterJob, 'Special');
+        vMatrixHTML += `
+        <div class="text-center">
+            <div>Lv. ${level}</div>
+            ${icon}
+        </div>
+        `;
+    }
+
+    vmatrixCard.innerHTML = vMatrixHTML;
+
+    await delay(300);
+
+    document.getElementById("screenshotBtnContainer").style.display = "block";
+
     } catch (error) {
-    document.getElementById("vmatrixCard").innerHTML = '<div class="alert alert-danger">캐릭터 정보를 불러오지 못했습니다.</div>';
+    tabLoading.innerHTML = '<div class="alert alert-danger">캐릭터 정보를 불러오지 못했습니다.</div>';
     console.error(error);
     }
 }
@@ -268,26 +401,7 @@ function getEquipmentSet(data) {
 
 function getJobDetail(job) {
     const detail = [];
-    const categoryMap = [
-    { group: ['히어로', '팔라딘', '다크나이트', '비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '보우마스터', '신궁', '패스파인더', '나이트로드', '섀도어', '듀얼블레이드', '캡틴', '바이퍼', '캐논슈터'], tag: '모험가' },
-    { group: ['소울마스터', '미하일', '플레임위자드', '윈드브레이커', '나이트워커', '스트라이커'], tag: '시그너스기사단' },
-    { group: ['아란', '에반', '메르세데스', '팬텀', '루미너스', '은월'], tag: '영웅' },
-    { group: ['블래스터', '배틀메이지', '와일드헌터', '제논', '메카닉'], tag: '레지스탕스' },
-    { group: ['데몬슬레이어', '데몬어벤져'], tag: '데몬' },
-    { group: ['카이저', '카데나', '카인', '엔젤릭버스터'], tag: '노바' },
-    { group: ['아델', '일리움', '칼리', '아크'], tag: '레프' },
-    { group: ['라라', '호영'], tag: '아니마' },
-    { group: ['제로'], tag: '초월자' },
-    { group: ['키네시스'], tag: '프렌즈 월드' },
-    { group: ['에릴', '시아'], tag: '샤인'}
-    ];
-    const classMap = [
-    { group: ['히어로', '팔라딘', '다크나이트', '소울마스터', '미하일', '블래스터', '데몬슬레이어', '데몬어벤져', '아란', '카이저', '아델', '제로', '에릴'], tag: '전사' },
-    { group: ['비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '플레임위자드', '에반', '루미너스', '배틀메이지', '일리움', '라라', '키네시스', '시아'], tag: '마법사' },
-    { group: ['보우마스터', '신궁', '패스파인더', '윈드브레이커', '메르세데스', '와일드헌터', '카인'], tag: '궁수' },
-    { group: ['나이트로드', '섀도어', '듀얼블레이드', '나이트워커', '팬텀', '카데나', '칼리', '호영', '제논'], tag: '도적' },
-    { group: ['캡틴', '바이퍼', '캐논슈터', '스트라이커', '은월', '메카닉', '엔젤릭버스터', '아크', '제논'], tag: '해적' }
-    ];
+    
     categoryMap.forEach(({ group, tag }) => { if (group.includes(job)) detail.push(tag); });
     classMap.forEach(({ group, tag }) => { if (group.includes(job)) detail.push(tag); });
     return detail;
@@ -488,4 +602,127 @@ function getFormattedDateTime() {
   const mi = String(now.getMinutes()).padStart(2, '0');
   const ss = String(now.getSeconds()).padStart(2, '0');
   return `${yyyy}${mm}${dd}_${hh}${mi}${ss}`;
+}
+
+// 옵션 문자열 조립 유틸 (안정 버전)
+function joinOptions(list, validOptions = [], maxLines = 2) {
+  if (!Array.isArray(list) || list.length === 0) return '';
+
+  // 옵션 누적 맵: name -> { value: number, isPct: boolean }
+  const acc = {};
+
+  const toNumberInfo = (raw) => {
+    if (raw == null) return null;
+    const s = String(raw).trim();
+    const isPct = s.includes('%');
+    // 콤마/퍼센트 제거 후 숫자 파싱
+    const num = parseFloat(s.replace(/,/g, '').replace('%', ''));
+    if (isNaN(num)) return null;
+    return { num, isPct };
+  };
+
+  for (const l of list) {
+    const name = l.option_name;
+    const info = toNumberInfo(l.option_value);
+    if (!name || !info) continue;
+
+    if (!acc[name]) {
+      acc[name] = { value: info.num, isPct: info.isPct };
+    } else {
+      acc[name].value += info.num;
+      // 어느 한 쪽이라도 퍼센트면 퍼센트로 취급
+      acc[name].isPct = acc[name].isPct || info.isPct;
+    }
+  }
+
+  // validOptions 순서대로 집계 → 문자열 라인 배열
+  const lines = [];
+  for (const key of validOptions) {
+    const entry = acc[key];
+    if (!entry) continue;
+
+    const text = entry.isPct
+      ? `${entry.value.toFixed(2)}%`
+      : entry.value.toLocaleString('ko-KR'); // 숫자 포맷팅
+
+    lines.push(`${key} ${text}`);
+    // if (lines.length >= maxLines) break;
+  }
+
+  return lines.join(', ');
+}
+
+// 스타포스 요약 만들기
+function makeStarforceSummary(item) {
+  const bits = [];
+  if (item.starforce_upgrade) bits.push(`⭐ ${item.starforce_upgrade}`);
+//   // 예: 잠재/에디 등급
+//   if (item.item_potential_option_grade) bits.push(item.item_potential_option_grade);
+//   if (item.item_additional_potential_option_grade) bits.push(`에디 ${item.item_additional_potential_option_grade}`);
+  return bits.join('  ');
+}
+
+// 아이템 카드 템플릿 (한 장)
+function renderItemCard(item, job) {
+    // 마법 직업군인지 확인
+    const isMagicJob = magicJob.indexOf(job) !== -1;
+    let additionalOption;
+    let potentialOption;
+    if (isMagicJob) {
+        additionalOption = validAdditionalOptionMagic;
+        potentialOption = validPotentialOptionMagic;
+    }
+    else {
+        additionalOption = validAdditionalOptionPhysics;
+        potentialOption = validPotentialOptionPhysics;
+    }
+    const starforce = makeStarforceSummary(item);
+    const addOptRaw = joinOptions(item.item_additional_option, additionalOption, 1);
+    const potOptRaw = joinOptions(item.item_potential_option, potentialOption, 1);
+    const addPotRaw = joinOptions(item.item_additional_potential_option, potentialOption, 1);
+
+    const addOpt = addOptRaw ? `주요 추옵 : ${addOptRaw}` : "";
+    const potOpt = potOptRaw ? `주요 잠재 : ${potOptRaw}` : "";
+    const addPot = addPotRaw ? `주요 에디잠재 : ${addPotRaw}` : "";
+    // 맨 아랫줄(옵션 라인) 구성: 있으면 붙이고, 없으면 생략
+    const subLines = [addOpt, potOpt, addPot].filter(Boolean);
+
+    return `
+        <div class="item-card d-flex">
+        <!-- 좌측: 아이콘 -->
+        <div class="item-left">
+            <img class="item-icon" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
+        </div>
+        <!-- 우측: 제목 + 옵션 -->
+        <div class="item-right flex-grow-1">
+            <div class="item-title d-flex align-items-center gap-2">
+            <span>${item.item_name || '-'}</span>
+            ${starforce ? `<span class="badge-soft">${starforce}</span>` : ''}
+            </div>
+            ${subLines.length ? `
+            <div class="item-subline mt-1">
+                ${subLines.filter(Boolean).map(line => `<div>${line}</div>`).join('')}
+            </div>` : ''}
+        </div>
+        </div>
+    `;
+}
+
+// item_equipment 배열을 2열 그리드에 렌더
+function renderItemEquip(resp) {
+  const grid = document.getElementById('itemGrid');
+  if (!grid) return;
+
+  const jobName = resp.character_class;
+  let items = (resp && Array.isArray(resp.item_equipment)) ? resp.item_equipment : [];
+
+  // ✅ 원하는 순서대로 정렬
+  items.sort((a, b) => {
+    const idxA = equipmentOrder.indexOf(a.item_equipment_slot_name);
+    const idxB = equipmentOrder.indexOf(b.item_equipment_slot_name);
+    // 못 찾으면 맨 뒤로 보냄
+    return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+  });
+
+  grid.innerHTML = items.map(item => renderItemCard(item, jobName)).join('');
 }
