@@ -688,23 +688,23 @@ function renderItemCard(item, job) {
     const subLines = [addOpt, potOpt, addPot].filter(Boolean);
 
     return `
-        <div class="item-card d-flex">
-        <!-- 좌측: 아이콘 -->
-        <div class="item-left">
-            <img class="item-icon" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
-        </div>
-        <!-- 우측: 제목 + 옵션 -->
-        <div class="item-right flex-grow-1">
-            <div class="item-title d-flex align-items-center gap-2">
-            <span>${item.item_name || '-'}</span>
-            ${starforce ? `<span class="badge-soft">${starforce}</span>` : ''}
+            <div class="item-card d-flex">
+                <!-- 좌측: 아이콘 -->
+                <div class="item-left">
+                    <img class="item-icon" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
+                </div>
+                <!-- 우측: 제목 + 옵션 -->
+                <div class="item-right flex-grow-1">
+                    <div class="item-title d-flex align-items-center gap-2">
+                    <span>${item.item_name || '-'}</span>
+                    ${starforce ? `<span class="badge-soft">${starforce}</span>` : ''}
+                    </div>
+                    ${subLines.length ? `
+                    <div class="item-subline mt-1">
+                        ${subLines.filter(Boolean).map(line => `<div>${line}</div>`).join('')}
+                    </div>` : ''}
+                </div>
             </div>
-            ${subLines.length ? `
-            <div class="item-subline mt-1">
-                ${subLines.filter(Boolean).map(line => `<div>${line}</div>`).join('')}
-            </div>` : ''}
-        </div>
-        </div>
     `;
 }
 
