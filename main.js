@@ -51,9 +51,10 @@ const validPotentialOptionMagic = [
 ]
 
 const additionalOptionGradeGroup = {
-  1: "rebirth_flame",
+  1: "rebirth_flame_180",
   2: "powerful_rebirth_flame",
-  3: "eternal_rebirth_flame"
+  3: "eternal_rebirth_flame",
+  4: "rebirth_flame"
 }
 
 const potentialGradeGroup = {
