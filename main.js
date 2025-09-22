@@ -50,6 +50,18 @@ const validPotentialOptionMagic = [
     "최대 HP"
 ]
 
+const additionalOptionGradeGroup = {
+  1: "rebirth_flame",
+  2: "powerful_rebirth_flame",
+  3: "eternal_rebirth_flame"
+}
+
+const potentialGradeGroup = {
+  1: 'R',
+  2: 'E',
+  3: 'U',
+  4: 'L'
+}
 const categoryMap = [
     { group: ['히어로', '팔라딘', '다크나이트', '비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '보우마스터', '신궁', '패스파인더', '나이트로드', '섀도어', '듀얼블레이드', '캡틴', '바이퍼', '캐논슈터'], tag: '모험가' },
     { group: ['소울마스터', '미하일', '플레임위자드', '윈드브레이커', '나이트워커', '스트라이커'], tag: '시그너스기사단' },
@@ -688,9 +700,13 @@ function renderItemCard(item, job) {
     const potOptRaw = joinOptions(item.item_potential_option, potentialOption, 1);
     const addPotRaw = joinOptions(item.item_additional_potential_option, potentialOption, 1);
 
-    const addOpt = addOptRaw ? `주요 추옵 : ${addOptRaw}` : "";
-    const potOpt = potOptRaw ? `주요 잠재 : ${potOptRaw}` : "";
-    const addPot = addPotRaw ? `주요 에디잠재 : ${addPotRaw}` : "";
+    const potentialGrade = potentialGradeGroup[item.item_potential_option_grade];
+    const additionalPotentialGrade = potentialGradeGroup[item.item_additional_potential_option_grade];
+    const additionalOptionGrade = additionalOptionGradeGroup[item.item_additional_option_grade];
+
+    const addOpt = addOptRaw ? `<img class="rebirth_flame" src="images/${additionalOptionGrade}.png"</img> <span>${addOptRaw}</span>` : "";
+    const potOpt = potOptRaw ? `<span class="potential ${potentialGrade}">${potentialGrade}</span> <span>${potOptRaw}</span>` : "";
+    const addPot = addPotRaw ? `<span class="potential a${additionalPotentialGrade}">${additionalPotentialGrade}</span> <span>${addPotRaw}</span>` : "";
     // 맨 아랫줄(옵션 라인) 구성: 있으면 붙이고, 없으면 생략
     const subLines = [addOpt, potOpt, addPot].filter(Boolean);
 
