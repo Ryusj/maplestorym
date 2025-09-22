@@ -63,6 +63,14 @@ const potentialGradeGroup = {
   3: 'U',
   4: 'L'
 }
+
+const itemGradeGroup = {
+  '레어': 'R',
+  '에픽': 'E',
+  '유니크': 'U',
+  '레전더리': 'L'
+}
+
 const categoryMap = [
     { group: ['히어로', '팔라딘', '다크나이트', '비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '보우마스터', '신궁', '패스파인더', '나이트로드', '섀도어', '듀얼블레이드', '캡틴', '바이퍼', '캐논슈터'], tag: '모험가' },
     { group: ['소울마스터', '미하일', '플레임위자드', '윈드브레이커', '나이트워커', '스트라이커'], tag: '시그너스기사단' },
@@ -701,6 +709,7 @@ function renderItemCard(item, job) {
     const potOptRaw = joinOptions(item.item_potential_option, potentialOption, 1);
     const addPotRaw = joinOptions(item.item_additional_potential_option, potentialOption, 1);
 
+    const itemGrade = itemGradeGroup[item.item_grade];
     const potentialGrade = potentialGradeGroup[item.item_potential_option_grade];
     const additionalPotentialGrade = potentialGradeGroup[item.item_additional_potential_option_grade];
     const additionalOptionGrade = additionalOptionGradeGroup[item.item_additional_option_grade];
@@ -715,7 +724,7 @@ function renderItemCard(item, job) {
             <div class="item-card d-flex">
                 <!-- 좌측: 아이콘 -->
                 <div class="item-left">
-                    <img class="item-icon" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
+                    <img class="item-icon ${itemGrade}" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
                 </div>
                 <!-- 우측: 제목 + 옵션 -->
                 <div class="item-right flex-grow-1">
