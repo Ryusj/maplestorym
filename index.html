@@ -227,6 +227,66 @@
       font-size: 12px;
       background: #009455;
     }
+
+    .link-grid{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0,1fr)); /* 한 줄 5개 (원하면 숫자만 바꿔) */
+      gap:10px;
+    }
+
+    .link-card{
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      padding:8px; border:1px solid #e9ecef; border-radius:10px; background:#fff;
+    }
+
+    .link-card img{ width:48px; height:48px; object-fit:contain; }
+
+    .link-level{ font-weight:700; font-size:12px; color:#111; }
+
+    .link-name{
+      font-size:12px; text-align:center; width:100%;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+
+    /* 버튼 active 스타일(부트스트랩 쓰면 자동, 아니면 아래) */
+    .btn.preset-active{ background:#0d6efd; color:#fff; border-color:#0d6efd; }
+
+    /* 두 칼럼(페이지1/페이지2) 고정 */
+    .hexa-pages-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+    }
+
+    .hexa-page{
+      border: 1px solid #e9ecef;
+      border-radius: 10px;
+      background: #fff;
+      padding: 12px;
+    }
+
+    .hexa-page-header{
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px; font-weight: 700;
+    }
+
+    .badge-active{
+      display:inline-flex; align-items:center; gap:4px;
+      background:#198754; color:#fff; border-radius:999px;
+      padding: 2px 8px; font-size: 12px;
+    }
+
+    .hexa-row{
+      display:flex; gap:8px; align-items:baseline;
+      padding:6px 0; border-top:1px dashed #f1f3f5;
+    }
+    .hexa-row:first-of-type{ border-top:0; }
+    .hexa-label{ width:56px; color:#6c757d; }
+    .hexa-level{ font-weight:700; width:84px; } /* 'Lv.XX' 고정폭 */
+    .hexa-text{ flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* 슬롯 버튼(1~6) */
+    .btn-slot.active{ background:#0d6efd; color:#fff; border-color:#0d6efd; }
   </style>
 </head>
 <body>
@@ -291,44 +351,58 @@
           <!-- 기본 정보 탭 -->
           <div class="tab-pane fade show active" id="tab-basic">
             <div id="tab-loading"></div>
-            <div class="row g-3">
-              <!-- 왼쪽 컬럼: Basic + Stat 세로 스택 -->
-              <div class="col-5 d-flex flex-column gap-3">
-                <div id="basicBox"><!-- Basic card 들어갈 자리 --></div>
-                <div id="statBox"><!-- Stat card 들어갈 자리 --></div>
-                <!-- 보석 전체 영역 -->
-                <div id="jewelWrap" class="card d-none">
-                  <div class="card-body">
-                    <h5 class="card-title mb-3">쥬얼 정보</h5>
+            <div class="d-flex flex-column gap-3">
+              <div class="row g-3">
+                <!-- 왼쪽 컬럼: Basic + Stat 세로 스택 -->
+                <div class="col-5 d-flex flex-column gap-3">
+                  <div id="basicBox"><!-- Basic card 들어갈 자리 --></div>
+                  <div id="statBox"><!-- Stat card 들어갈 자리 --></div>
+                  <!-- 보석 전체 영역 -->
+                  <div id="jewelWrap" class="card d-none">
+                    <div class="card-body">
+                      <h5 class="card-title mb-3">쥬얼 정보</h5>
 
-                    <!-- 페이지 선택 버튼 -->
-                    <div id="jewelPageBtns" class="d-flex gap-2 mb-3"></div>
+                      <!-- 페이지 선택 버튼 -->
+                      <div id="jewelPageBtns" class="d-flex gap-2 mb-3"></div>
 
-                    <!-- 보석 리스트 -->
-                    <div id="jewelGrid" class="jewel-grid"></div>
+                      <!-- 보석 리스트 -->
+                      <div id="jewelGrid" class="jewel-grid"></div>
 
-                    <!-- 세트 옵션 표시 -->
-                    <div id="jewelSetOption" class="mt-3 text-center text-secondary small"></div>
+                      <!-- 세트 옵션 표시 -->
+                      <div id="jewelSetOption" class="mt-3 text-center text-secondary small"></div>
+                    </div>
+                  </div>
+                  <div id="symbolWrap" class="card d-none">
+                    <div class="card-body">
+                      <h5 class="card-title mb-3">심볼 정보</h5>
+                        <div id="arcaneBody">
+                          <h6>아케인심볼</h6>
+                          <div id="arcaneSymbolGrid" class="symbol-grid"></div>
+                        </div>
+                        <div id="authenticBody">
+                          <h6>어센틱심볼</h6>
+                          <div id="authenticSymbolGrid" class="symbol-grid"></div>
+                        </div>
+                    </div>
                   </div>
                 </div>
-                <div id="symbolWrap" class="card d-none">
-                  <div class="card-body">
-                    <h5 class="card-title mb-3">심볼 정보</h5>
-                      <div id="arcaneBody">
-                        <h6>아케인심볼</h6>
-                        <div id="arcaneSymbolGrid" class="symbol-grid"></div>
-                      </div>
-                      <div id="authenticBody">
-                        <h6>어센틱심볼</h6>
-                        <div id="authenticSymbolGrid" class="symbol-grid"></div>
-                      </div>
+
+                <!-- 오른쪽 컬럼: Item 크게 -->
+                <div class="col-7">
+                  <div id="itemBox">
                   </div>
                 </div>
               </div>
+              <!-- 헥사 매트릭스(스탯 코어) -->
+              <div id="hexaWrap" class="card d-none">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">헥사 매트릭스 : 스탯 코어</h5>
 
-              <!-- 오른쪽 컬럼: Item 크게 -->
-              <div class="col-7">
-                <div id="itemBox">
+                  <!-- 슬롯 버튼 (1~6) -->
+                  <div id="hexaSlotBtns" class="d-flex gap-2 mb-3"></div>
+
+                  <!-- 선택 슬롯의 페이지 뷰 (좌: 페이지1, 우: 페이지2) -->
+                  <div id="hexaPages" class="hexa-pages-grid"></div>
                 </div>
               </div>
             </div>
@@ -336,14 +410,36 @@
 
           <!-- 스킬 정보 탭 (V매트릭스 등) -->
           <div class="tab-pane fade" id="tab-skill">
+            <div id="tab-loading-skill"></div>
+            <div class="d-flex flex-column gap-3">
+              <!-- 링크 스킬 -->
+              <div class="row g-3">
+                <div class="col-5 d-flex flex-column gap-3">
+                  <div id="basicBoxSkill"><!-- Basic card 들어갈 자리 --></div>
+                </div>
+                <div class="col-7">
+                  <div id="linkSkillsWrap" class="card d-none">
+                    <div class="card-body">
+                      <h5 class="card-title mb-3">링크 스킬</h5>
+
+                      <!-- 프리셋 버튼 -->
+                      <div id="linkPresetBtns" class="d-flex gap-2 mb-3"></div>
+
+                      <!-- 스킬 그리드 -->
+                      <div id="linkGrid" class="link-grid"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             <div id="vmatrixBox"><!-- 기존 V매트릭스 출력 --></div>
+            </div>
           </div>
         </div>
 
         <!-- 푸터는 탭 밖 유지 -->
         <footer class="text-center mt-5 py-3 bg-light text-muted small">
           <div>
-            버전: <strong>1.1.3</strong> | 제작: <strong>공략대장</strong> | Data based on
+            버전: <strong>1.1.4</strong> | 제작: <strong>공략대장</strong> | Data based on
             <a href="https://openapi.nexon.com/" target="_blank" class="text-muted text-decoration-none">NEXON Open API</a>
           </div>
         </footer>

@@ -144,12 +144,16 @@ async function searchCharacter() {
     const apiKey = document.getElementById('apiKey').value;
 
     const basicCard   = document.getElementById("basicBox");
+    const basicCardSkill = document.getElementById("basicBoxSkill");
     const statCard    = document.getElementById("statBox");
     const itemCard    = document.getElementById("itemBox");
     const vmatrixCard = document.getElementById("vmatrixBox");
     const jewelWrap   = document.getElementById("jewelWrap");
     const symbolWrap   = document.getElementById("symbolWrap");
+    const hexaWrap   = document.getElementById("hexaWrap");
+    const linkWrap   = document.getElementById("linkSkillsWrap");
     const tabLoading = document.getElementById("tab-loading");
+    const tabLoadingSkill = document.getElementById("tab-loading-skill");
 
     if (!basicCard || !statCard || !itemCard || !vmatrixCard) {
     console.error("DOM element missing", { basicCard, statCard, itemCard, vmatrixCard });
@@ -159,19 +163,23 @@ async function searchCharacter() {
 
     // 하위 카드 초기화
     basicCard.innerHTML = "";
+    basicCardSkill.innerHTML = "";
     statCard.innerHTML = "";
     itemCard.innerHTML = "";
     vmatrixCard.innerHTML = "";
     jewelWrap.classList.add("d-none");
     symbolWrap.classList.add("d-none");
+    hexaWrap.classList.add("d-none");
+    linkWrap.classList.add("d-none");
 
     if (!world || !nickname || !apiKey) {
     tabLoading.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
+    tabLoadingSkill.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
     return;
     }
 
     tabLoading.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
-
+    tabLoadingSkill.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
     try {
     const ocidResponse = await fetch(`https://open.api.nexon.com/maplestorym/v1/id?character_name=${encodeURIComponent(nickname)}&world_name=${encodeURIComponent(world)}`, {
         headers: { 'x-nxopen-api-key': apiKey }
@@ -179,7 +187,7 @@ async function searchCharacter() {
     const ocidData = await ocidResponse.json();
     const ocid = ocidData.ocid;
 
-    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'vmatrix', 'set-effect', 'jewel', 'symbol'];
+    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'vmatrix', 'set-effect', 'jewel', 'symbol', 'link-skill', 'hexamatrix-stat'];
     // const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'cashitem-equipment', 'vmatrix', 'symbol', 'set-effect', 'jewel', 'link-skill', 'hexamatrix-skill', 'hexamatrix-stat', 'android-equipment', 'beauty-equipment', 'skill-equipment', 'pet-equipment'];
     let guildName = '';
     let characterJob = '';
@@ -196,13 +204,14 @@ async function searchCharacter() {
         await delay(300);
     }
     tabLoading.innerHTML = '';
+    tabLoadingSkill.innerHTML = '';
     
     guildName = apiData["guild"].guild_name || '';
 
     characterJob = apiData["basic"].character_class || apiData["basic"].character_job_name || '';
     const genderKo = apiData["basic"].character_gender === 'Male' ? '남' : apiData["basic"].character_gender === 'Female' ? '여' : apiData["basic"].character_gender;
     const formattedExp = `${formatNumber(apiData["basic"].character_exp)} ${formatKoreanExp(apiData["basic"].character_exp)}`;
-    basicCard.innerHTML = `
+    const basicHTML = `
         <div class="card h-100">
             <div class="card-body py-3">
             <!-- 헤더: 이름 + 길드/칭호 배지 영역 -->
@@ -273,6 +282,10 @@ async function searchCharacter() {
             </div>
         </div>
         `;
+
+        
+    basicCard.innerHTML = basicHTML;
+    basicCardSkill.innerHTML = basicHTML;
 
     statCard.innerHTML = `
         <div class="card h-100">
@@ -368,6 +381,10 @@ async function searchCharacter() {
 
     vmatrixCard.innerHTML = vMatrixHTML;
 
+    renderLinkSkills(apiData["link-skill"]);
+
+    renderHexaStat(apiData["hexamatrix-stat"]);
+
     await delay(300);
 
     document.getElementById("screenshotBtnContainer").style.display = "block";
@@ -376,55 +393,6 @@ async function searchCharacter() {
     tabLoading.innerHTML = '<div class="alert alert-danger">캐릭터 정보를 불러오지 못했습니다.</div>';
     console.error(error);
     }
-}
-
-function getEquipmentSet(data) {
-    let setOption = [
-    {
-        setName: '아케인셰이드',
-        setCounts: 0
-    },
-    {
-        setName: '앱솔랩스',
-        setCounts: 0
-    },
-    {
-        setName: '칠흑의 보스',
-        setCounts: 0
-    },
-    {
-        setName: '군단장 전리품',
-        setCounts: 0
-    }
-    ];
-
-    const bossOfDarkness = [
-    "루즈 컨트롤 머신 마크", "마력이 깃든 안대", "몽환의 벨트",
-    "저주받은 적의 마도서", "저주받은 청의 마도서", "거대한 공포",
-    "고통의 근원", "커맨더 포스 이어링", "창세의 뱃지"
-    ];
-
-    const commanderReward = [
-    "카오스 영생의 돌", "영생의 돌", "지옥의 불꽃",
-    "고귀한 이피아의 반지", "검은 노바의 휘장", "폭군의 위상",
-    "매커네이터 펜던트", "도미네이터 펜던트"
-    ];
-
-    console.log(data);
-
-    data.filter(data => data.item_name).forEach(({ item_name }) => {
-    if (item_name.startsWith("아케인셰이드")) {
-        setOption[setOption.findIndex(set => set.setName === "아케인셰이드")].setCounts++;
-    } else if (item_name.startsWith("앱솔랩스")) {
-        setOption[setOption.findIndex(set => set.setName === "앱솔랩스")].setCounts++;
-    } else if (bossOfDarkness.some(item => item_name.startsWith(item))) {
-        setOption[setOption.findIndex(set => set.setName === "칠흑의 보스")].setCounts++;
-    } else if (commanderReward.some(item => item_name.startsWith(item))) {
-        setOption[setOption.findIndex(set => set.setName === "군단장 전리품")].setCounts++;
-    }
-    });
-
-    return setOption;
 }
 
 function getJobDetail(job) {
@@ -512,112 +480,51 @@ function getSkillImageTag(skillName, job, type) {
     return html;
 }
 
-// function downloadResultImage() {
-//     const result = document.getElementById('result');
-//     if (!result) {
-//         alert("저장할 결과가 없습니다.");
-//         return;
-//     }
-
-//     html2canvas(document.getElementById('result'), {
-//         width: 1280,
-//         height: document.getElementById('result').scrollHeight,
-//         scale: 2,        // 해상도 향상
-//         useCORS: true,
-//         windowWidth: 1280 // 레이아웃 계산에 필요
-//     }).then(canvas => {
-//         const link = document.createElement('a');
-//         link.download = 'character_result.png';
-//         link.href = canvas.toDataURL();
-//         link.click();
-//     });
-// }
 
 async function downloadResultImage() {
-  const original = document.getElementById("result");
-
+  const original = document.getElementById('result');
   if (!original) {
-    alert("결과 영역이 없습니다.");
+    alert('결과 영역이 없습니다.');
     return;
   }
 
-  const world = document.getElementById('world').value || '월드';
-  const nickname = document.getElementById('nickname').value || '캐릭터';
+  // 파일명 구성 (기존 그대로)
+  const world = document.getElementById('world')?.value || '월드';
+  const nickname = document.getElementById('nickname')?.value || '캐릭터';
   const dateTime = getFormattedDateTime();
   const filename = `${world}_${nickname}_${dateTime}.png`;
 
-  // 캡처용 클론 생성
-  const clone = original.cloneNode(true);
-  clone.classList.add("screenshot-mode");
-
-  // 캡처용 스타일 삽입
-  const style = document.createElement("style");
-  style.textContent = `
-    .screenshot-mode {
-        width: 1280px !important;
-        font-size: 16px;
-        background: white;
-        padding: 24px;
-        box-sizing: border-box;
-    }
-
-    .screenshot-mode .row {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-    }
-
-    .screenshot-mode .col-md-4,
-    .screenshot-mode .col-md-6,
-    .screenshot-mode .col-md-12 {
-        width: auto !important;
-        flex: 1 1 0% !important;
-        max-width: unset !important;
-    }
-
-    .screenshot-mode #screenshotButton {
-      display: none !important;
-    }
-
-    .screenshot-mode footer {
-      display: block !important;
-    }
-  `;
-  clone.prepend(style);
-
-  // 캡처 컨테이너 생성
-  const wrapper = document.createElement("div");
-  wrapper.style.width = "1280px";  // 고정
-  wrapper.style.transform = "scale(1)";
-  wrapper.style.transformOrigin = "top left";
-  wrapper.style.position = "fixed";
-  wrapper.style.top = "-10000px"; // 화면 밖으로
-  wrapper.style.left = "0";
-  wrapper.style.zIndex = "-1";
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
+  // 캡처에서 빼고 싶은 요소 잠깐 숨기기 (필요 없으면 지워도 됨)
+  const toHide = [
+    document.getElementById('screenshotBtn'),
+    ...original.querySelectorAll('[data-hide-on-capture]')
+  ].filter(Boolean);
+  const prevVisibility = toHide.map(el => el.style.visibility);
+  toHide.forEach(el => (el.style.visibility = 'hidden'));
 
   try {
-    const canvas = await html2canvas(clone, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        useCORS: true,
-        width: 1280,
-        windowWidth: 1280  // 이것도 꼭 지정
+    const canvas = await html2canvas(original, {
+      backgroundColor: '#ffffff',
+      useCORS: true,   // 외부 이미지 포함
+      scale: 2,        // 선명도
+      // 고정폭이면 아래 옵션 생략해도 OK.
+      // 긴 영역(스크롤 전체)을 한 장으로 담고 싶다면 주석 해제:
+      width:  original.scrollWidth,
+      height: original.scrollHeight,
+      windowWidth:  original.scrollWidth
     });
 
-    const dataURL = canvas.toDataURL("image/png");
-
-    const a = document.createElement("a");
+    const dataURL = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
     a.href = dataURL;
     a.download = filename;
-    document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
-  } catch (error) {
-    console.error("스크린샷 생성 오류:", error);
-    alert("스크린샷 생성 중 문제가 발생했습니다.");
+  } catch (err) {
+    console.error('스크린샷 생성 오류:', err);
+    alert('스크린샷 생성 중 문제가 발생했습니다.');
   } finally {
-    document.body.removeChild(wrapper); // 정리
+    // 숨겼던 요소 복원
+    toHide.forEach((el, i) => (el.style.visibility = prevVisibility[i] || ''));
   }
 }
 
@@ -866,4 +773,182 @@ function renderSymbols(symbolData) {
   drawSymbol(arcaneGrid, arcaneBody, symbolData.arcane_symbol);
   drawSymbol(authenticGrid, authenticBody, symbolData.authentic_symbol);
   wrap.classList.remove("d-none");
+}
+
+// data: 질문에 준 JSON 응답 객체
+function renderLinkSkills(data){
+  const wrap = document.getElementById('linkSkillsWrap');
+  const btns = document.getElementById('linkPresetBtns');
+  const grid = document.getElementById('linkGrid');
+
+  if(!data || !Array.isArray(data.link_skill) || data.link_skill.length === 0){
+    wrap.classList.add('d-none');
+    return;
+  }
+
+  const presets = data.link_skill;
+  const defaultPreset = data.use_prest_no || presets[0].preset_no;
+  let current = defaultPreset;
+
+  // 프리셋 버튼 생성
+  btns.innerHTML = presets.map(p =>
+    `<button type="button"
+             class="btn btn-sm btn-outline-primary ${p.preset_no===current?'preset-active':''}"
+             data-preset="${p.preset_no}">프리셋 ${p.preset_no}</button>`
+  ).join('');
+
+  // 버튼 이벤트
+  btns.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      current = parseInt(b.dataset.preset,10);
+      btns.querySelectorAll('button').forEach(x=>x.classList.remove('preset-active'));
+      b.classList.add('preset-active');
+      draw(current);
+    });
+  });
+
+  // 중복 스킬 합산(이름 기준)
+  function aggregateSkills(list){
+    const map = new Map();
+    for(const s of list||[]){
+      const key = s.skill_name;
+      const prev = map.get(key);
+      const lvl = Number(s.skill_level)||0;
+      if(prev){
+        prev.level += lvl;                 // 레벨 합산
+      }else{
+        map.set(key, {                     // 첫 항목 저장
+          name: s.skill_name,
+          level: lvl,
+          icon: s.skill_icon || '',
+          desc: s.skill_description || '',
+          eff:  s.skill_effect || ''
+        });
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  function draw(presetNo){
+    const preset = presets.find(p=>p.preset_no===presetNo);
+    if(!preset){ grid.innerHTML=''; return; }
+
+    const agg = aggregateSkills(preset.link_skill_info);
+    // 정렬은 자유(예: 이름순). 필요 없으면 제거
+    agg.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+
+    grid.innerHTML = agg.map(s=>`
+      <div class="link-card">
+        <img src="${s.icon}" alt="${s.name}">
+        <div class="link-level">Lv.${s.level}</div>
+        <div class="link-name">${s.name}</div>
+      </div>
+    `).join('');
+  }
+
+  // 초기 렌더(기본 프리셋)
+  draw(current);
+  wrap.classList.remove('d-none');
+}
+
+function renderHexaStat(data){
+  const wrap = document.getElementById('hexaWrap');
+  const btns = document.getElementById('hexaSlotBtns');
+  const pagesEl = document.getElementById('hexaPages');
+
+  // 방어: 데이터 없으면 숨김
+  if(!data || !Array.isArray(data.hexamatrix_stat)){
+    wrap.classList.add('d-none');
+    return;
+  }
+
+  // 슬롯별 데이터 맵 (slotNo -> stat_info[])
+  const slotMap = new Map();
+  for(const s of data.hexamatrix_stat){
+    slotMap.set(s.stat_core_slot, Array.isArray(s.stat_info) ? s.stat_info : []);
+  }
+
+  // 기본 선택 슬롯: 1번에 데이터 있으면 1, 아니면 존재하는 첫 슬롯
+  const existingSlots = [...slotMap.keys()].sort((a,b)=>a-b);
+  let currentSlot = existingSlots.length ? existingSlots[0] : 1;
+
+  // 슬롯 버튼(1~6) 만들기: 없는 슬롯은 disabled
+  btns.innerHTML = Array.from({length:6}, (_,i)=>{
+    const n = i+1;
+    const has = slotMap.has(n);
+    return `<button type="button"
+              class="btn btn-sm btn-outline-primary btn-slot ${n===currentSlot?'active':''}"
+              data-slot="${n}" ${has?'':'disabled'}>
+              슬롯 ${n}
+            </button>`;
+  }).join('');
+
+  // 버튼 이벤트
+  btns.querySelectorAll('.btn-slot').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(b.disabled) return;
+      currentSlot = parseInt(b.dataset.slot,10);
+      btns.querySelectorAll('.btn-slot').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      drawSlot(currentSlot);
+    });
+  });
+
+  // 페이지 렌더 함수 (좌: page_no=1, 우: page_no=2)
+  function drawSlot(slotNo){
+    const pages = (slotMap.get(slotNo) || []).slice().sort((a,b)=>a.page_no-b.page_no);
+    const page1 = pages.find(p=>p.page_no===1) || null;
+    const page2 = pages.find(p=>p.page_no===2) || null;
+
+    pagesEl.innerHTML = `
+      ${renderPageCard(1, page1)}
+      ${renderPageCard(2, page2)}
+    `;
+  }
+
+  function renderPageCard(pageNo, p){
+    if(!p){
+      return `
+        <div class="hexa-page">
+          <div class="hexa-page-header">
+            <span>페이지 ${pageNo}</span>
+            <span class="badge-active" style="visibility:hidden">활성</span>
+          </div>
+          <div class="text-secondary small">데이터가 없습니다.</div>
+        </div>
+      `;
+    }
+    const active = p.activate_flag === '1' || p.activate_flag === 1;
+
+    return `
+      <div class="hexa-page">
+        <div class="hexa-page-header">
+          <span>페이지 ${pageNo}</span>
+          ${active ? `<span class="badge-active">활성</span>` : `<span class="badge-active" style="opacity:.3">비활성</span>`}
+        </div>
+
+        <div class="hexa-row">
+          <div class="hexa-label">메인</div>
+          <div class="hexa-level">Lv.${p.main_stat_level ?? 0}</div>
+          <div class="hexa-text">${p.main_stat || '-'}</div>
+        </div>
+
+        <div class="hexa-row">
+          <div class="hexa-label">서브1</div>
+          <div class="hexa-level">Lv.${p.sub_1_stat_level ?? 0}</div>
+          <div class="hexa-text">${p.sub_1_stat || '-'}</div>
+        </div>
+
+        <div class="hexa-row">
+          <div class="hexa-label">서브2</div>
+          <div class="hexa-level">Lv.${p.sub_2_stat_level ?? 0}</div>
+          <div class="hexa-text">${p.sub_2_stat || '-'}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 초기 렌더
+  drawSlot(currentSlot);
+  wrap.classList.remove('d-none');
 }
