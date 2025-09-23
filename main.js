@@ -28,26 +28,34 @@ const validAdditionalOptionPhysics = [
     "물리 대미지",
     "최종 대미지",
     "방어율 무시",
-    "물리 공격력"
+    "물리 공격력",
+    "아이템 드롭률",
+    "메소 획득량"
 ]
 
 const validAdditionalOptionMagic = [
     "마법 대미지",
     "최종 대미지",
     "방어율 무시",
-    "마법 공격력"
+    "마법 공격력",
+    "아이템 드롭률",
+    "메소 획득량"
 ]
 
 const validPotentialOptionPhysics = [
     "물리 대미지",
     "보스 공격력",
-    "최대 HP"
+    "최대 HP",
+    "아이템 드롭률",
+    "메소 획득량"
 ]
 
 const validPotentialOptionMagic = [
     "마법 대미지",
     "보스 공격력",
-    "최대 HP"
+    "최대 HP",
+    "아이템 드롭률",
+    "메소 획득량"
 ]
 
 const additionalOptionGradeGroup = {
@@ -620,12 +628,20 @@ function renderItemCard(item, job) {
     const potentialGrade = potentialGradeGroup[item.item_potential_option_grade];
     const additionalPotentialGrade = potentialGradeGroup[item.item_additional_potential_option_grade];
     const additionalOptionGrade = additionalOptionGradeGroup[item.item_additional_option_grade];
+    const soul = item.soul_info;
+
+    if (soul) {
+      if (!soul.soul_name.startsWith('위대한 ')) {
+        soul.soul_name = soul.soul_name.split(" ").slice(1).join(" ");
+      }
+    }
 
     const addOpt = addOptRaw ? `<img class="rebirth_flame" src="images/${additionalOptionGrade}.png"</img> <span>${addOptRaw}</span>` : "";
     const potOpt = potOptRaw ? `<span class="potential ${potentialGrade}">${potentialGrade}</span> <span>${potOptRaw}</span>` : "";
     const addPot = addPotRaw ? `<span class="potential a${additionalPotentialGrade}">${additionalPotentialGrade}</span> <span>${addPotRaw}</span>` : "";
+    const soupOpt = soul ? `<img class="soul" src="images/soul/${soul.soul_name}.png"</img> <span>${soul.soul_option}</span>`:"";
     // 맨 아랫줄(옵션 라인) 구성: 있으면 붙이고, 없으면 생략
-    const subLines = [addOpt, potOpt, addPot].filter(Boolean);
+    const subLines = [addOpt, potOpt, addPot, soupOpt].filter(Boolean);
 
     return `
             <div class="item-card d-flex">
