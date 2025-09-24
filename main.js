@@ -79,6 +79,19 @@ const itemGradeGroup = {
   '레전더리': 'L'
 }
 
+const emblemBackground = {
+  1: 'images/emblem/emblem_lv1.png',
+  2: 'images/emblem/emblem_lv1.png',
+  3: 'images/emblem/emblem_lv1.png',
+  4: 'images/emblem/emblem_lv4.png',
+  5: 'images/emblem/emblem_lv5.png',
+  6: 'images/emblem/emblem_lv5.png',
+  7: 'images/emblem/emblem_lv7.png',
+  8: 'images/emblem/emblem_lv7.png',
+  9: 'images/emblem/emblem_lv9.png',
+  10: 'images/emblem/emblem_lv10.png'
+}
+
 const categoryMap = [
     { group: ['히어로', '팔라딘', '다크나이트', '비숍', '아크메이지(불,독)', '아크메이지(썬,콜)', '보우마스터', '신궁', '패스파인더', '나이트로드', '섀도어', '듀얼블레이드', '캡틴', '바이퍼', '캐논슈터'], tag: '모험가' },
     { group: ['소울마스터', '미하일', '플레임위자드', '윈드브레이커', '나이트워커', '스트라이커'], tag: '시그너스기사단' },
@@ -151,8 +164,8 @@ async function searchCharacter() {
     const nickname = document.getElementById('nickname').value;
     const apiKey = document.getElementById('apiKey').value;
 
-    const basicCard   = document.getElementById("basicBox");
-    const basicCardSkill = document.getElementById("basicBoxSkill");
+    // const basicCard   = document.getElementById("basicBox");
+    // const basicCardSkill = document.getElementById("basicBoxSkill");
     const statCard    = document.getElementById("statBox");
     const itemCard    = document.getElementById("itemBox");
     const vmatrixCard = document.getElementById("vmatrixBox");
@@ -163,15 +176,15 @@ async function searchCharacter() {
     const tabLoading = document.getElementById("tab-loading");
     const tabLoadingSkill = document.getElementById("tab-loading-skill");
 
-    if (!basicCard || !statCard || !itemCard || !vmatrixCard) {
-    console.error("DOM element missing", { basicCard, statCard, itemCard, vmatrixCard });
+    if (!statCard || !itemCard || !vmatrixCard) {
+    console.error("DOM element missing", { statCard, itemCard, vmatrixCard });
     alert("결과 영역 ID를 확인해주세요.");
     return; // 여기서 중단
     }
 
     // 하위 카드 초기화
-    basicCard.innerHTML = "";
-    basicCardSkill.innerHTML = "";
+    // basicCard.innerHTML = "";
+    // basicCardSkill.innerHTML = "";
     statCard.innerHTML = "";
     itemCard.innerHTML = "";
     vmatrixCard.innerHTML = "";
@@ -292,8 +305,9 @@ async function searchCharacter() {
         `;
 
         
-    basicCard.innerHTML = basicHTML;
-    basicCardSkill.innerHTML = basicHTML;
+    // basicCard.innerHTML = basicHTML;
+
+    renderProfileHeader(apiData["basic"], guildName);
 
     statCard.innerHTML = `
         <div class="card h-100">
@@ -626,6 +640,7 @@ function renderItemCard(item, job) {
     const additionalPotentialGrade = potentialGradeGroup[item.item_additional_potential_option_grade];
     const additionalOptionGrade = additionalOptionGradeGroup[item.item_additional_option_grade];
     const soul = item.soul_info;
+    const emblem = item.emblem_info;
 
     if (soul) {
       if (!soul.soul_name.startsWith('위대한 ')) {
@@ -637,14 +652,20 @@ function renderItemCard(item, job) {
     const potOpt = potOptRaw ? `<span class="potential ${potentialGrade}">${potentialGrade}</span> <span>${potOptRaw}</span>` : "";
     const addPot = addPotRaw ? `<span class="potential a${additionalPotentialGrade}">${additionalPotentialGrade}</span> <span>${addPotRaw}</span>` : "";
     const soupOpt = soul ? `<img class="soul" src="images/soul/${soul.soul_name}.png"</img> <span>${soul.soul_option}</span>`:"";
+    const emblemOpt = emblem ? `<img class="emblem" src="images/emblem/마력의_증표.png"</img> <span>${emblem.emblem_option}</span>`:"";
     // 맨 아랫줄(옵션 라인) 구성: 있으면 붙이고, 없으면 생략
-    const subLines = [addOpt, potOpt, addPot, soupOpt].filter(Boolean);
+    const subLines = [addOpt, potOpt, addPot, soupOpt, emblemOpt].filter(Boolean);
 
     return `
             <div class="item-card d-flex">
                 <!-- 좌측: 아이콘 -->
                 <div class="item-left">
-                    <img class="item-icon ${itemGrade}" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
+                    ${emblem ? 
+                      `<div class="item-emblem-background lv${emblem.emblem_level}">
+                        <img class="item-icon" src="${item.item_icon || ''}" alt="${item.item_name || ''}">
+                      </div>`
+                      :`<img class="item-icon ${itemGrade}" src="${item.item_icon || ''}" alt="${item.item_name || ''}">`}
+                    
                 </div>
                 <!-- 우측: 제목 + 옵션 -->
                 <div class="item-right flex-grow-1">
@@ -964,4 +985,32 @@ function renderHexaStat(data){
   // 초기 렌더
   drawSlot(currentSlot);
   wrap.classList.remove('d-none');
+}
+
+function renderProfileHeader(basic, guildName){
+  const header = document.getElementById('profileHeader');
+  if (!header || !basic) return;
+
+  // 이미지/닉네임
+  document.getElementById('profileAvatar').src = basic.character_image || '';
+  document.getElementById('profileName').textContent = basic.character_name || '';
+
+  // 월드명 + 아이콘
+  const worldIcon = document.querySelector('#badgeWorld .world-icon');
+  worldIcon.src = `images/world/${basic.world_name}.png`;
+  document.querySelector('#badgeWorld .world-text').textContent = basic.world_name || '';
+
+  // 레벨 / 직업 / 길드
+  document.querySelector('#badgeLevel .level-text').textContent = `Lv.${basic.character_level ?? '-'}`;
+  document.querySelector('#badgeJob .job-text').textContent = basic.character_job_name || '';
+
+  const guildPill = document.getElementById('badgeGuild');
+  if (guildName) {
+    guildPill.classList.remove('d-none');
+    guildPill.querySelector('.guild-text').textContent = guildName;
+  } else {
+    guildPill.classList.add('d-none');
+  }
+
+  header.classList.remove('d-none');
 }

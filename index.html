@@ -9,7 +9,72 @@
     /* .tab-content { display: none; }
     .tab-content.active { display: block; } */
     #result pre { background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; }
-    .world-icon { width: 16px; height: 16px; margin-right: 4px; vertical-align: middle; }
+    /* 프로필 전체 영역 */
+    .profile-hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin: 8px 0 12px;
+      text-align: center; /* 안쪽 텍스트 중앙 정렬 */
+    }
+
+    .hero-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* 수직 중앙 정렬 */
+      gap: 6px;
+    }
+
+    .hero-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-avatar {
+      width: 112px;
+      height: 112px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid #eef2f7;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .hero-name {
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      white-space: nowrap;
+      font-size: 14px;
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .world-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+    }
+    /* 좁은 화면에서 살짝 축소 */
+    @media (max-width: 560px){
+      .profile-hero{ gap:10px; }
+      .hero-avatar{ width:96px; height:96px; }
+    }
     .v-icon-wrapper {
     width: 64px;
     text-align: center;
@@ -96,8 +161,55 @@
       width: 40px;
       height: 40px;
       object-fit: contain;
-      padding: 4px;
+      padding: 5px;
       border-radius: 4px;
+    }
+
+    .item-emblem-background {
+      width: 40px;
+      height: 40px;
+    }
+
+    .item-emblem-background.lv1, .item-emblem-background.lv2, .item-emblem-background.lv3 {
+      background-image: url('images/emblem/emblem_lv1.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .item-emblem-background.lv4 {
+      background-image: url('images/emblem/emblem_lv4.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .item-emblem-background.lv5, .item-emblem-background.lv6 {
+      background-image: url('images/emblem/emblem_lv5.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .item-emblem-background.lv7, .item-emblem-background.lv8 {
+      background-image: url('images/emblem/emblem_lv7.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .item-emblem-background.lv9 {
+      background-image: url('images/emblem/emblem_lv9.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .item-emblem-background.lv10 {
+      background-image: url('images/emblem/emblem_lv10.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .item-right {
@@ -172,7 +284,7 @@
       white-space: nowrap;
     }
 
-    .rebirth_flame, .soul {
+    .rebirth_flame, .soul, .emblem {
       width: 20px;
       height: 20px;
     }
@@ -324,6 +436,29 @@
       </div>
       <!-- 결과 영역 -->
       <div id="result" class="mt-4">
+        <!-- ✅ 프로필 헤더: 탭보다 위에, 처음엔 숨김 -->
+        <div id="profileHeader" class="profile-hero d-none">
+          <!-- 왼쪽: 월드 / 레벨 -->
+          <div class="hero-side hero-left">
+            <span id="badgeWorld" class="pill">
+              <img class="world-icon" alt="월드">
+              <span class="world-text"></span>
+            </span>
+            <span id="badgeLevel" class="pill"><span class="level-text"></span></span>
+          </div>
+
+          <!-- 중앙: 캐릭터 이미지 + 닉네임 -->
+          <div class="hero-center">
+            <img id="profileAvatar" class="hero-avatar" alt="">
+            <div id="profileName" class="hero-name"></div>
+          </div>
+
+          <!-- 오른쪽: 직업 / 길드 -->
+          <div class="hero-side hero-right">
+            <span id="badgeJob" class="pill"><span class="job-text"></span></span>
+            <span id="badgeGuild" class="pill d-none"><span class="guild-text"></span></span>
+          </div>
+        </div>
         <!-- 탭 버튼: 2개 -->
         <ul class="nav nav-tabs" id="resultTabs">
           <li class="nav-item">
@@ -355,7 +490,6 @@
               <div class="row g-3">
                 <!-- 왼쪽 컬럼: Basic + Stat 세로 스택 -->
                 <div class="col-5 d-flex flex-column gap-3">
-                  <div id="basicBox"><!-- Basic card 들어갈 자리 --></div>
                   <div id="statBox"><!-- Stat card 들어갈 자리 --></div>
                   <!-- 보석 전체 영역 -->
                   <div id="jewelWrap" class="card d-none">
@@ -413,22 +547,15 @@
             <div id="tab-loading-skill"></div>
             <div class="d-flex flex-column gap-3">
               <!-- 링크 스킬 -->
-              <div class="row g-3">
-                <div class="col-5 d-flex flex-column gap-3">
-                  <div id="basicBoxSkill"><!-- Basic card 들어갈 자리 --></div>
-                </div>
-                <div class="col-7">
-                  <div id="linkSkillsWrap" class="card d-none">
-                    <div class="card-body">
-                      <h5 class="card-title mb-3">링크 스킬</h5>
+              <div id="linkSkillsWrap" class="card d-none">
+                <div class="card-body">
+                  <h5 class="card-title mb-3">링크 스킬</h5>
 
-                      <!-- 프리셋 버튼 -->
-                      <div id="linkPresetBtns" class="d-flex gap-2 mb-3"></div>
+                  <!-- 프리셋 버튼 -->
+                  <div id="linkPresetBtns" class="d-flex gap-2 mb-3"></div>
 
-                      <!-- 스킬 그리드 -->
-                      <div id="linkGrid" class="link-grid"></div>
-                    </div>
-                  </div>
+                  <!-- 스킬 그리드 -->
+                  <div id="linkGrid" class="link-grid"></div>
                 </div>
               </div>
             <div id="vmatrixBox"><!-- 기존 V매트릭스 출력 --></div>
@@ -439,7 +566,7 @@
         <!-- 푸터는 탭 밖 유지 -->
         <footer class="text-center mt-5 py-3 bg-light text-muted small">
           <div>
-            버전: <strong>1.1.5</strong> | 제작: <strong>공략대장</strong> | Data based on
+            버전: <strong>1.1.6</strong> | 제작: <strong>공략대장</strong> | Data based on
             <a href="https://openapi.nexon.com/" target="_blank" class="text-muted text-decoration-none">NEXON Open API</a>
           </div>
         </footer>
