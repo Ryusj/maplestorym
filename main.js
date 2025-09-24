@@ -164,8 +164,7 @@ async function searchCharacter() {
     const nickname = document.getElementById('nickname').value;
     const apiKey = document.getElementById('apiKey').value;
 
-    // const basicCard   = document.getElementById("basicBox");
-    // const basicCardSkill = document.getElementById("basicBoxSkill");
+    const basicCard   = document.getElementById("basicBox");
     const statCard    = document.getElementById("statBox");
     const itemCard    = document.getElementById("itemBox");
     const vmatrixCard = document.getElementById("vmatrixBox");
@@ -175,23 +174,25 @@ async function searchCharacter() {
     const linkWrap   = document.getElementById("linkSkillsWrap");
     const tabLoading = document.getElementById("tab-loading");
     const tabLoadingSkill = document.getElementById("tab-loading-skill");
+    const profile    = document.getElementById("profileHeader");
 
-    if (!statCard || !itemCard || !vmatrixCard) {
+    if (!basicCard || !statCard || !itemCard || !vmatrixCard) {
     console.error("DOM element missing", { statCard, itemCard, vmatrixCard });
     alert("결과 영역 ID를 확인해주세요.");
     return; // 여기서 중단
     }
 
     // 하위 카드 초기화
-    // basicCard.innerHTML = "";
-    // basicCardSkill.innerHTML = "";
+    basicCard.innerHTML = "";
     statCard.innerHTML = "";
     itemCard.innerHTML = "";
     vmatrixCard.innerHTML = "";
+
     jewelWrap.classList.add("d-none");
     symbolWrap.classList.add("d-none");
     hexaWrap.classList.add("d-none");
     linkWrap.classList.add("d-none");
+    profile.classList.add("d-none");
 
     if (!world || !nickname || !apiKey) {
     tabLoading.innerHTML = '<div class="alert alert-warning">모든 필드를 입력해주세요.</div>';
@@ -235,41 +236,7 @@ async function searchCharacter() {
     const basicHTML = `
         <div class="card h-100">
             <div class="card-body py-3">
-            <!-- 헤더: 이름 + 길드/칭호 배지 영역 -->
-            <div class="d-flex align-items-start gap-3">
-                <!-- 왼쪽: 동그란 아바타 -->
-                <img src="${apiData["basic"].character_image}" alt="${apiData["basic"].character_name}" class="avatar-clip shadow-sm">
-
-                <!-- 오른쪽: 정보 영역 -->
-                <div class="flex-grow-1">
-                <!-- 1줄: 닉네임 + 서버 아이콘/칭호 -->
-                <div class="d-flex align-items-center gap-2">
-                    <h5 class="mb-0 fw-semibold">${apiData["basic"].character_name}</h5>
-                    ${`<span class="badge text-bg-light border"><img src="images/world/${apiData["basic"].world_name}.png" class="world-icon" alt="${apiData["basic"].world_name}">
-                    ${apiData["basic"].world_name}</span>`}
-                </div>
-
-                <!-- 2줄: 레벨/직업/길드 -->
-                <div class="text-body-secondary small mt-1">
-                    Lv.${apiData["basic"].character_level}
-                    ${apiData["basic"].character_job_name ? ` | ${apiData["basic"].character_job_name}` : ''}
-                    ${guildName ? ` | <span class="text-primary-emphasis">${guildName}</span>` : ''}
-                </div>
-
-                <!-- 3줄: “뱃지” 스타일 요약(원하는 항목만) -->
-                <div class="mt-2 d-flex flex-wrap gap-2">
-                <!--
-                    ${apiData["basic"].total_rank ? `<span class="badge badge-pill-light">종합랭킹 ${apiData["basic"].total_rank}</span>` : ''}
-                    ${apiData["basic"].server_class_rank ? `<span class="badge badge-pill-light">서버/직업랭킹 ${apiData["basic"].server_class_rank}</span>` : ''}
-                    ${apiData["basic"].union_level ? `<span class="badge bg-primary-subtle text-primary-emphasis border">유니온 ${apiData["basic"].union_level}</span>` : ''}
-                    ${apiData["basic"].dojo ? `<span class="badge bg-danger-subtle text-danger-emphasis border">무릉도장 ${apiData["basic"].dojo}층</span>` : ''} -->
-                </div>
-                </div>
-            </div>
-
-            <!-- 구분선 -->
-            <hr class="my-3">
-
+            <h5 class="card-title">기본 정보</h5>
             <!-- 상세 표 (왼쪽에 보이던 리스트를 여기 배치) -->
             <ul class="list-group list-group-flush">
                 <li class="list-group-item px-0 d-flex">
@@ -293,19 +260,12 @@ async function searchCharacter() {
                 <div class="flex-grow-1">${formatDate(apiData["basic"].character_date_last_logout)}</div>
                 </li>
             </ul>
-
-            <!-- (선택) 하단 아이콘 띠 -->
-            ${apiData["basic"].profile_icons ? `
-                <div class="mt-3 d-flex align-items-center gap-2">
-                ${apiData["basic"].profile_icons.map(src => `<img src="${src}" alt="" height="28">`).join('')}
-                </div>
-            ` : ''}
             </div>
         </div>
         `;
 
         
-    // basicCard.innerHTML = basicHTML;
+    basicCard.innerHTML = basicHTML;
 
     renderProfileHeader(apiData["basic"], guildName);
 
