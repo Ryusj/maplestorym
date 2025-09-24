@@ -599,9 +599,6 @@ function joinOptions(list, validOptions = [], maxLines = 2) {
 function makeStarforceSummary(item) {
   const bits = [];
   if (item.starforce_upgrade) bits.push(`⭐ ${item.starforce_upgrade}`);
-//   // 예: 잠재/에디 등급
-//   if (item.item_potential_option_grade) bits.push(item.item_potential_option_grade);
-//   if (item.item_additional_potential_option_grade) bits.push(`에디 ${item.item_additional_potential_option_grade}`);
   return bits.join('  ');
 }
 
