@@ -9,45 +9,9 @@
     /* .tab-content { display: none; }
     .tab-content.active { display: block; } */
     #result pre { background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; }
-    /* 프로필 전체 영역 */
-    .profile-hero {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      margin: 8px 0 12px;
-      text-align: center; /* 안쪽 텍스트 중앙 정렬 */
-    }
 
-    .hero-side {
-      display: flex;
-      flex-direction: column;
-      align-items: center; /* 수직 중앙 정렬 */
-      gap: 6px;
-    }
-
-    .hero-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .hero-avatar {
-      width: 112px;
-      height: 112px;
-      object-fit: contain;
-      border-radius: 50%;
-      background: #fff;
-      border: 3px solid #eef2f7;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    }
-
-    .hero-name {
-      font-weight: 700;
-      font-size: 18px;
-      line-height: 1.2;
-      text-align: center;
+    .profile {
+      margin-bottom: 10px;
     }
 
     .pill {
@@ -108,6 +72,7 @@
     .avatar-clip { width: 108px; height: 108px; object-fit: cover; border-radius: 50%; border: 3px solid #eef2f7; }
     .badge-pill-light { background: #f8f9fa; border: 1px solid #e9ecef; }
     .badge {
+      margin-left: 4px;
       display: inline-flex;
       align-items: center;
       line-height: 1;
@@ -142,7 +107,7 @@
     }
 
     /* 카드 한 장 */
-    .item-card {
+    .item-card, .hexaskill-card {
       display: flex;
       gap: 8px;
       border: 1px solid #e9ecef;
@@ -151,10 +116,26 @@
       background: #fff;
     }
 
-    .item-left {
+    .hexaskill-card {
+      align-items:flex-end;
+    }
+
+    .item-left, .hexaskill-left {
       flex: 0 0 auto;
       display: flex;
+    }
+
+    .item-left {
       align-items: flex-start;
+    }
+
+    .item-right, .hexaskill-right {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hexaskill-right {
+      justify-content:flex-end;
     }
 
     .item-icon {
@@ -210,11 +191,6 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-    }
-
-    .item-right {
-      display: flex;
-      flex-direction: column;
     }
 
     .item-title {
@@ -346,16 +322,26 @@
       gap:10px;
     }
 
-    .link-card{
+    .hexaskill-grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap:10px;
+    }
+
+    .link-card {
       display:flex; flex-direction:column; align-items:center; gap:4px;
       padding:8px; border:1px solid #e9ecef; border-radius:10px; background:#fff;
     }
 
-    .link-card img{ width:48px; height:48px; object-fit:contain; }
+    .link-card img { width:48px; height:48px; object-fit:contain; }
 
-    .link-level{ font-weight:700; font-size:12px; color:#111; }
+    .link-level { font-weight:700; font-size:12px; color:#111; }
 
-    .link-name{
+    .hexaskill-name { font-weight:700; font-size:14px; color:#111; }
+
+    .hexaskill-level { font-size: 12px;}
+
+    .link-name {
       font-size:12px; text-align:center; width:100%;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
@@ -436,28 +422,7 @@
       </div>
       <!-- 결과 영역 -->
       <div id="result" class="mt-4">
-        <!-- ✅ 프로필 헤더: 탭보다 위에, 처음엔 숨김 -->
-        <div id="profileHeader" class="profile-hero d-none">
-          <!-- 왼쪽: 월드 / 레벨 -->
-          <div class="hero-side hero-left">
-            <span id="badgeWorld" class="pill">
-              <img class="world-icon" alt="월드">
-              <span class="world-text"></span>
-            </span>
-            <span id="badgeLevel" class="pill"><span class="level-text"></span></span>
-          </div>
-
-          <!-- 중앙: 캐릭터 이미지 + 닉네임 -->
-          <div class="hero-center">
-            <img id="profileAvatar" class="hero-avatar" alt="">
-            <div id="profileName" class="hero-name"></div>
-          </div>
-
-          <!-- 오른쪽: 직업 / 길드 -->
-          <div class="hero-side hero-right">
-            <span id="badgeJob" class="pill"><span class="job-text"></span></span>
-            <span id="badgeGuild" class="pill d-none"><span class="guild-text"></span></span>
-          </div>
+        <div id="profile" class="profile d-none">
         </div>
         <!-- 탭 버튼: 2개 -->
         <ul class="nav nav-tabs" id="resultTabs">
@@ -559,7 +524,9 @@
                   <div id="linkGrid" class="link-grid"></div>
                 </div>
               </div>
-            <div id="vmatrixBox"><!-- 기존 V매트릭스 출력 --></div>
+              <div id="vmatrixBox"><!-- V매트릭스 출력 --></div>
+              <div id="hexaMatrixBox"><!-- Hexa매트릭스 출력 -->
+              </div>
             </div>
           </div>
         </div>
@@ -567,7 +534,7 @@
         <!-- 푸터는 탭 밖 유지 -->
         <footer class="text-center mt-5 py-3 bg-light text-muted small">
           <div>
-            버전: <strong>1.1.7</strong> | 제작: <strong>공략대장</strong> | Data based on
+            버전: <strong>1.1.8</strong> | 제작: <strong>공략대장</strong> | Data based on
             <a href="https://openapi.nexon.com/" target="_blank" class="text-muted text-decoration-none">NEXON Open API</a>
           </div>
         </footer>

@@ -174,7 +174,7 @@ async function searchCharacter() {
     const linkWrap   = document.getElementById("linkSkillsWrap");
     const tabLoading = document.getElementById("tab-loading");
     const tabLoadingSkill = document.getElementById("tab-loading-skill");
-    const profile    = document.getElementById("profileHeader");
+    const profile    = document.getElementById("profile");
 
     if (!basicCard || !statCard || !itemCard || !vmatrixCard) {
     console.error("DOM element missing", { statCard, itemCard, vmatrixCard });
@@ -209,7 +209,7 @@ async function searchCharacter() {
     const ocidData = await ocidResponse.json();
     const ocid = ocidData.ocid;
 
-    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'vmatrix', 'set-effect', 'jewel', 'symbol', 'link-skill', 'hexamatrix-stat'];
+    const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'vmatrix', 'set-effect', 'jewel', 'symbol', 'link-skill', 'hexamatrix-stat', 'hexamatrix-skill'];
     // const endpoints = ['guild', 'basic', 'stat', 'item-equipment', 'cashitem-equipment', 'vmatrix', 'symbol', 'set-effect', 'jewel', 'link-skill', 'hexamatrix-skill', 'hexamatrix-stat', 'android-equipment', 'beauty-equipment', 'skill-equipment', 'pet-equipment'];
     let guildName = '';
     let characterJob = '';
@@ -232,7 +232,6 @@ async function searchCharacter() {
 
     characterJob = apiData["basic"].character_class || apiData["basic"].character_job_name || '';
     const genderKo = apiData["basic"].character_gender === 'Male' ? '남' : apiData["basic"].character_gender === 'Female' ? '여' : apiData["basic"].character_gender;
-    const formattedExp = `${formatNumber(apiData["basic"].character_exp)} ${formatKoreanExp(apiData["basic"].character_exp)}`;
     const basicHTML = `
         <div class="card h-100">
             <div class="card-body py-3">
@@ -246,10 +245,6 @@ async function searchCharacter() {
                 <li class="list-group-item px-0 d-flex">
                 <div class="text-secondary" style="min-width:7rem">생성일</div>
                 <div class="flex-grow-1">${formatDate(apiData["basic"].character_date_create)}</div>
-                </li>
-                <li class="list-group-item px-0 d-flex">
-                <div class="text-secondary" style="min-width:7rem">경험치</div>
-                <div class="flex-grow-1">${formattedExp}</div>
                 </li>
                 <li class="list-group-item px-0 d-flex">
                 <div class="text-secondary" style="min-width:7rem">최근 접속</div>
@@ -366,6 +361,8 @@ async function searchCharacter() {
     renderLinkSkills(apiData["link-skill"]);
 
     renderHexaStat(apiData["hexamatrix-stat"]);
+
+    renderHexaSkill(apiData["hexamatrix-skill"]);
 
     await delay(300);
 
@@ -488,7 +485,7 @@ async function downloadResultImage() {
     const canvas = await html2canvas(original, {
       backgroundColor: '#ffffff',
       useCORS: true,   // 외부 이미지 포함
-      scale: 2,        // 선명도
+      scale: window.devicePixelRatio,        // 선명도
       // 고정폭이면 아래 옵션 생략해도 OK.
       // 긴 영역(스크롤 전체)을 한 장으로 담고 싶다면 주석 해제:
       width:  original.scrollWidth,
@@ -670,9 +667,9 @@ function renderItemEquip(equipment, set) {
     </div>
     <div class="card-body">
         <h5 class="card-title">세트 옵션 정보</h5>
-            <ul class="list-group list-group-flush">
-            ${setEffect.map(set => `<li class="list-group-item">${set.set_name} ${set.set_count}세트</li>`).join(' ')}
-            </ul>
+        <div class="flex-grow-1">
+          ${setEffect.map(set => `<div class="mt-1"><span>${set.set_name}</span> <span class="badge text-bg-light border">${set.set_count}세트</span></div>`).join(' ')}
+        </div>
     </div>
   </div>`
 }
@@ -723,7 +720,7 @@ function renderJewels(jewelData) {
        </div>`
     ).join('');
 
-    // ✅ 세트옵션은 현재 페이지가 기본 페이지일 때만 보이기
+    // 세트옵션은 현재 페이지가 기본 페이지일 때만 보이기
     if (pageNo === defaultPage && jewelData.use_jewel_set_option) {
       setOpt.textContent = jewelData.use_jewel_set_option;
       setOpt.classList.remove("d-none");
@@ -769,7 +766,6 @@ function renderSymbols(symbolData) {
   wrap.classList.remove("d-none");
 }
 
-// data: 질문에 준 JSON 응답 객체
 function renderLinkSkills(data){
   const wrap = document.getElementById('linkSkillsWrap');
   const btns = document.getElementById('linkPresetBtns');
@@ -947,30 +943,106 @@ function renderHexaStat(data){
   wrap.classList.remove('d-none');
 }
 
-function renderProfileHeader(basic, guildName){
-  const header = document.getElementById('profileHeader');
+function renderHexaSkill(response) {
+  const hexaSkill = document.getElementById('hexaMatrixBox');
+
+  if (!hexaSkill || !response) return;
+
+  hexaSkill.innerHTML = 
+  `<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">헥사 매트릭스</h5>
+        <div class="hexaskill-grid">
+          <div id="hexaSkillCore" class="d-flex flex-column gap-1">
+            <h6>스킬 코어</h6>
+            ${response.hexamatrix_skill.filter(data => data.skill_type==='스킬 코어').map(data => 
+              `<div class="hexaskill-card">
+                <div class="hexaskill-left">
+                  <img class="skill-icon" src="${data.skill_icon}" alt="${data.skill_name}">
+                </div>
+                <div class="hexaskill-right flex-grow-1">
+                  <div class="hexaskill-level">Lv.${data.slot_level}</div>
+                  <div class="hexaskill-name">${data.skill_name}</div>
+                </div>
+              </div>`
+            ).join('')}
+          </div>
+          <div id="hexaMasteryCore" class="d-flex flex-column gap-1">
+            <h6>마스터리 코어</h6>
+            ${response.hexamatrix_skill.filter(data => data.skill_type==='마스터리 코어').map(data => 
+              `<div class="hexaskill-card">
+                <div class="hexaskill-left">
+                  <img class="skill-icon" src="${data.skill_icon}" alt="${data.skill_name}">
+                </div>
+                <div class="hexaskill-right flex-grow-1">
+                  <div class="hexaskill-level">Lv.${data.slot_level}</div>
+                  <div class="hexaskill-name">${data.skill_name}</div>
+                </div>
+              </div>`
+            ).join('')}
+          </div>
+          <div id="hexaEnhancementCore" class="d-flex flex-column gap-1">
+            <h6>강화 코어</h6>
+            ${response.hexamatrix_skill.filter(data => data.skill_type==='강화 코어').map(data => 
+              `<div class="hexaskill-card">
+                <div class="hexaskill-left">
+                  <img class="skill-icon" src="${data.skill_icon}" alt="${data.skill_name}">
+                </div>
+                <div class="hexaskill-right flex-grow-1">
+                  <div class="hexaskill-level">Lv.${data.slot_level}</div>
+                  <div class="hexaskill-name">${data.skill_name}</div>
+                </div>
+              </div>`
+            ).join('')}
+          </div>
+          <div id="hexaCommonCore" class="d-flex flex-column gap-1">
+            <h6>공용 코어</h6>
+            ${response.hexamatrix_skill.filter(data => data.skill_type==='공용 코어').map(data => 
+              `<div class="hexaskill-card">
+                <div class="hexaskill-left">
+                  <img class="skill-icon" src="${data.skill_icon}" alt="${data.skill_name}">
+                </div>
+                <div class="hexaskill-right flex-grow-1">
+                  <div class="hexaskill-level">Lv.${data.slot_level}</div>
+                  <div class="hexaskill-name">${data.skill_name}</div>
+                </div>
+              </div>`
+            ).join('')}
+          </div>
+        </div>
+    </div>
+  </div>`
+}
+
+function renderProfileHeader(basic, guildName) {
+  const header = document.getElementById('profile');
   if (!header || !basic) return;
 
-  // 이미지/닉네임
-  document.getElementById('profileAvatar').src = basic.character_image || '';
-  document.getElementById('profileName').textContent = basic.character_name || '';
+  header.innerHTML = `
+  <div class="card">
+    <div class="card-body py-3">
+      <div class="d-flex align-items-start gap-3">
+        <img src="${basic.character_image}" alt="${basic.character_name}" class="avatar-clip shadow-sm">
 
-  // 월드명 + 아이콘
-  const worldIcon = document.querySelector('#badgeWorld .world-icon');
-  worldIcon.src = `images/world/${basic.world_name}.png`;
-  document.querySelector('#badgeWorld .world-text').textContent = basic.world_name || '';
+        <div class="flex-grow-1">
+          <div class=d-flex align-items-center gap-2">
+            <h5 class="mb-0 fw-semibold">${basic.character_name}</h5>
+            <span class="badge text-bg-light border">
+              <img src="images/world/${basic.world_name}.png" class="world-icon" alt="${basic.world_name}">${basic.world_name}
+            </span>
+          </div>
 
-  // 레벨 / 직업 / 길드
-  document.querySelector('#badgeLevel .level-text').textContent = `Lv.${basic.character_level ?? '-'}`;
-  document.querySelector('#badgeJob .job-text').textContent = basic.character_job_name || '';
+          <div class="text-body-secondary small mt-1">
+            Lv.${basic.character_level} | ${basic.character_job_name} | ${guildName}
+          </div>
 
-  const guildPill = document.getElementById('badgeGuild');
-  if (guildName) {
-    guildPill.classList.remove('d-none');
-    guildPill.querySelector('.guild-text').textContent = guildName;
-  } else {
-    guildPill.classList.add('d-none');
-  }
-
+          <div class="text-body-secondary small mt-1">
+            경험치 : ${formatNumber(basic.character_exp)} ${formatKoreanExp(basic.character_exp)}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  `
   header.classList.remove('d-none');
 }
